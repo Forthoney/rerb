@@ -1,0 +1,40 @@
+<html>
+<script src="https://cdn.jsdelivr.net/npm/@ruby/wasm-wasi/dist/browser.umd.js"></script>
+<script>
+  const { DefaultRubyVM } = window["ruby-wasm-wasi"];
+  const main = async () => {
+    // Fetch and instantiate WebAssembly binary
+    const response = await fetch(
+      "https://cdn.jsdelivr.net/npm/ruby-head-wasm-wasi@latest/dist/ruby+stdlib.wasm"
+    );
+    const buffer = await response.arrayBuffer();
+    const module = await WebAssembly.compile(buffer);
+    const { vm } = await DefaultRubyVM(module);
+
+    vm.printVersion();
+    vm.eval(<%= @code %>);
+  };
+
+  main();
+</script>
+
+<body>
+  <div id="todo-list" style="margin: 20px; outline: 1px solid black; padding: 20px;">Loading...</div>
+
+  <div id="description">
+    <h1>Ruby.wasm todo list</h1>
+    <p>
+      above is a todo list implemented in Ruby Running in your
+      browser!  It
+      uses <a href="https://github.com/ruby/ruby.wasm">ruby/ruby.wasm</a>
+      to run Ruby code in your browser.  The code is in the editor
+      below. You can modify it and hit the "rebuild" button to see
+      your updated todo list running.
+    </p>
+    <button id="rebuild-button">rebuild</button>
+
+    <div id="code" style="outline: 1px solid black; margin: 20px;"></div>
+  </div>
+</body>
+
+</html>
