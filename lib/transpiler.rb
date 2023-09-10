@@ -20,11 +20,7 @@ class Frame
   def collect_result
     @elems.reduce('') do |acc, elem|
       case elem
-      in [:string, content]
-        "#{acc}#{content}"
-      in [:erb, content]
-        "#{acc}#{content}"
-      in [:container, content]
+      in [:string | :erb | :container, content]
         "#{acc}#{content}"
       in [el_name, content]
         "#{acc}#{content}#{@name}.appendChild(#{el_name})\n"
