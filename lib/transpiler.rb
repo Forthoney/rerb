@@ -16,6 +16,23 @@ class Frame
     @elems = @elems.push(elem)
     return
   end
+
+  def collect_result
+    @elems.reduce('') do |acc, elem|
+      case elem
+      in [:string, content]
+        "#{acc}#{content}"
+      in [:erb, content]
+        "#{acc}#{content}"
+      in [:container, content]
+        "#{acc}#{content}"
+      in [el_name, content]
+        "#{acc}#{content}#{@name}.appendChild(#{el_name})\n"
+      else
+        raise StandardError, "\n#{elem} cannot be parsed.\nCurrent frame: #{self}"
+      end
+    end
+  end
 end
 
 class Transpiler
@@ -54,16 +71,14 @@ class Transpiler
       add_new_frame(el_name)
       return
     in [:closing_tag, _]
-      frame = @frames.pop
-      collect_child_result(frame)
+      [:container, @frames.pop.collect_result]
     in [:container, _]
       add_new_frame(current_frame.name)
       ast.children.each do |node|
         transpiled = transpile_ast(node)
         current_frame.push!(transpiled) unless transpiled.nil?
       end
-      frame = @frames.pop
-      collect_child_result(frame)
+      [:container, @frames.pop.collect_result]
     else
       raise StandardError, "Failed to transpile"
     end
@@ -84,24 +99,6 @@ class Transpiler
     else
       raise ArgumentError
     end
-  end
-
-  def collect_child_result(frame)
-    result = frame.elems.reduce('') do |acc, elem|
-      case elem
-      in [:string, content]
-        "#{acc}#{content}"
-      in [:erb, content]
-        "#{acc}#{content}"
-      in [:container, content]
-        "#{acc}#{content}"
-      in [el_name, content]
-        "#{acc}#{content}#{frame.name}.appendChild(#{el_name})\n"
-      else
-        raise StandardError, "\n#{elem} cannot be parsed.\nCurrent frames: #{@frames}"
-      end
-    end
-    [:container, result]
   end
 
   def add_new_frame(name)
