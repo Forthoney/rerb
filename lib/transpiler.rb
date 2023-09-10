@@ -64,22 +64,9 @@ class Transpiler
 
     case node.type
     when :tag
-      tag = BetterHtml::Tree::Tag.from_node(node)
-      if tag.closing?
-        [:container, @frames.pop.collect_result]
-      else
-        el_name = generate_el_name
-        current_frame.push!([el_name, "#{el_name} = doc.createElement('#{tag.name}')\n"])
-        add_new_frame(el_name)
-        return
-      end
+      transpile_tag(node)
     when :text, :document
-      add_new_frame(current_frame.name)
-      node.children.each do |n|
-        transpiled = transpile_ast(n)
-        current_frame.push!(transpiled) unless transpiled.nil?
-      end
-      [:container, @frames.pop.collect_result]
+      transpile_container(node)
     when :erb
       transpile_erb(node)
     else
@@ -99,6 +86,27 @@ class Transpiler
 
   def transpile_erb(erb)
     [:erb, "erb\n"]
+  end
+
+  def transpile_container(node)
+    add_new_frame(current_frame.name)
+    node.children.each do |n|
+      transpiled = transpile_ast(n)
+      current_frame.push!(transpiled) unless transpiled.nil?
+    end
+    [:container, @frames.pop.collect_result]
+  end
+
+  def transpile_tag(node)
+    tag = BetterHtml::Tree::Tag.from_node(node)
+    if tag.closing?
+      [:container, @frames.pop.collect_result]
+    else
+      el_name = generate_el_name
+      current_frame.push!([el_name, "#{el_name} = doc.createElement('#{tag.name}')\n"])
+      add_new_frame(el_name)
+      return
+    end
   end
 end
 
