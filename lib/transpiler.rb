@@ -59,45 +59,31 @@ class Transpiler
     BetterHtml::Parser.new(buffer)
   end
 
-  def transpile_ast(ast)
-    case extract_node_info(ast)
-    in [:string, nil]
-      [:string, "#{current_frame.name}[:innerHTML] = #{ast}\n"]
-    in [:erb, _]
-      transpile_erb(ast)
-    in [:opening_tag, tag]
-      el_name = generate_el_name
-      current_frame.push!([el_name, "#{el_name} = doc.createElement('#{tag.name}')\n"])
-      add_new_frame(el_name)
-      return
-    in [:closing_tag, _]
-      [:container, @frames.pop.collect_result]
-    in [:container, _]
-      add_new_frame(current_frame.name)
-      ast.children.each do |node|
-        transpiled = transpile_ast(node)
-        current_frame.push!(transpiled) unless transpiled.nil?
-      end
-      [:container, @frames.pop.collect_result]
-    else
-      raise StandardError, "Failed to transpile"
-    end
-  end
-
-  def extract_node_info(node)
-    return [:string, nil] if node.is_a?(String)
+  def transpile_ast(node)
+    return [:string, "#{current_frame.name}[:innerHTML] = #{node}\n"] if node.is_a?(String)
 
     case node.type
     when :tag
       tag = BetterHtml::Tree::Tag.from_node(node)
-      type = tag.closing? ? :closing_tag : :opening_tag
-      [type, tag]
+      if tag.closing?
+        [:container, @frames.pop.collect_result]
+      else
+        el_name = generate_el_name
+        current_frame.push!([el_name, "#{el_name} = doc.createElement('#{tag.name}')\n"])
+        add_new_frame(el_name)
+        return
+      end
     when :text, :document
-      [:container, nil]
+      add_new_frame(current_frame.name)
+      node.children.each do |n|
+        transpiled = transpile_ast(n)
+        current_frame.push!(transpiled) unless transpiled.nil?
+      end
+      [:container, @frames.pop.collect_result]
     when :erb
-      [:erb, nil]
+      transpile_erb(node)
     else
-      raise ArgumentError
+      raise StandardError, "Failed to transpile"
     end
   end
 
