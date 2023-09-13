@@ -4,6 +4,7 @@ require 'better_html'
 require 'better_html/parser'
 require 'better_html/tree/tag'
 
+# Stack Frame Class
 class Frame
   attr_reader :name, :elems
 
@@ -13,24 +14,12 @@ class Frame
   end
 
   def push!(elem)
-    @elems = @elems.push(elem)
-    return
-  end
-
-  def collect_result
-    @elems.reduce('') do |acc, elem|
-      case elem
-      in [:string | :erb | :container, content]
-        "#{acc}#{content}"
-      in [el_name, content]
-        "#{acc}#{content}#{@name}.appendChild(#{el_name})\n"
-      else
-        raise StandardError, "\n#{elem} cannot be parsed.\nCurrent frame: #{self}"
-      end
-    end
+    @elems = @elems << elem
+    nil
   end
 end
 
+# Compile ERB into ruby.wasm compatible code
 class Transpiler
   def initialize(source)
     @counter = 0
@@ -55,8 +44,21 @@ class Transpiler
     BetterHtml::Parser.new(buffer)
   end
 
+  def collect_result(frame)
+    frame.elems.reduce('') do |acc, elem|
+      case elem
+      in [:string | :erb | :container, content]
+        "#{acc}#{content}"
+      in [el_name, content]
+        "#{acc}#{content}#{frame.name}.appendChild(#{el_name})\n"
+      else
+        raise StandardError, "\n#{elem} cannot be parsed.\nCurrent frame: #{self}"
+      end
+    end
+  end
+
   def transpile_ast(node)
-    return [:string, "#{current_frame.name}[:innerHTML] = #{node}\n"] if node.is_a?(String)
+    return [:string, add_to_inner_html(node)] if node.is_a?(String)
 
     case node.type
     when :tag
@@ -66,13 +68,13 @@ class Transpiler
     when :erb
       transpile_erb(node)
     else
-      raise StandardError, "Failed to transpile"
+      raise StandardError, 'Failed to transpile'
     end
   end
 
-  def add_new_frame(name)
+  def add_new_frame!(name)
     @frames = @frames << Frame.new(name)
-    return
+    nil
   end
 
   def generate_el_name
@@ -81,30 +83,44 @@ class Transpiler
   end
 
   def transpile_erb(erb)
-    [:erb, "erb\n"]
+    case erb.children
+    in [nil, _, code, _]
+      [:erb, "neq_erb---#{unpack_code(code)}\n"]
+    in [_indicator, _, code, _]
+      [:erb, add_to_inner_html("\#{#{unpack_code(code)}}")]
+    else
+      raise StandardError
+    end
   end
 
   def transpile_container(node)
-    add_new_frame(current_frame.name)
+    add_new_frame!(current_frame.name)
     node.children.each do |n|
       transpiled = transpile_ast(n)
       current_frame.push!(transpiled) unless transpiled.nil?
     end
-    [:container, @frames.pop.collect_result]
+    [:container, collect_result(@frames.pop)]
   end
 
   def transpile_tag(node)
     tag = BetterHtml::Tree::Tag.from_node(node)
     if tag.closing?
-      [:container, @frames.pop.collect_result]
+      [:container, collect_result(@frames.pop)]
     else
       el_name = generate_el_name
       current_frame.push!([el_name, "#{el_name} = doc.createElement('#{tag.name}')\n"])
-      add_new_frame(el_name)
-      return
+      add_new_frame!(el_name)
     end
+  end
+
+  def unpack_code(block)
+    block.children[0].strip
+  end
+
+  def add_to_inner_html(elem)
+    "#{current_frame.name}[:innerHTML] += \"#{elem}\"\n"
   end
 end
 
-transpiler = Transpiler.new('todo_small.rhtml')
+transpiler = Transpiler.new(ARGV[0])
 puts transpiler.transpile
