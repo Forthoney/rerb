@@ -35,7 +35,10 @@ module WERB
     private
 
     def current_frame
-      @frames.last
+      frame = @frames.last
+      raise StandardError, 'No Frames' if frame.nil?
+
+      frame
     end
 
     def create_parser(source)
@@ -46,7 +49,10 @@ module WERB
     end
 
     def collect_result
-      @frames.pop.elems.reduce('') do |acc, elem|
+      frame = @frames.pop
+      raise StandardError, 'No frames to pop' if frame.nil?
+
+      frame.elems.reduce('') do |acc, elem|
         case elem
         in [:string | :erb | :container, content]
           "#{acc}#{content}"

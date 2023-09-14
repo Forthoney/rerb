@@ -12,6 +12,10 @@ module WERB
 
   # Compile ERB into ruby.wasm compatible code
   class Transpiler
+    @counter: Integer
+    @parser: untyped
+    @frames: Array[Frame]
+
     def initialize: (String source) -> void
 
     def transpile: () -> String
