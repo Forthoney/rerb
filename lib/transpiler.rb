@@ -44,13 +44,13 @@ class Transpiler
     BetterHtml::Parser.new(buffer)
   end
 
-  def collect_result(frame)
-    frame.elems.reduce('') do |acc, elem|
+  def collect_result
+    @frames.pop.elems.reduce('') do |acc, elem|
       case elem
       in [:string | :erb | :container, content]
         "#{acc}#{content}"
       in [el_name, content]
-        "#{acc}#{content}#{frame.name}.appendChild(#{el_name})\n"
+        "#{acc}#{content}#{current_frame.name}.appendChild(#{el_name})\n"
       else
         raise StandardError, "\n#{elem} cannot be parsed.\nCurrent frame: #{self}"
       end
@@ -67,6 +67,8 @@ class Transpiler
       transpile_container(node)
     when :erb
       transpile_erb(node)
+    when :code
+      [:code, "#{unpack_code(node)}\n"]
     else
       raise StandardError, 'Failed to transpile'
     end
@@ -85,7 +87,12 @@ class Transpiler
   def transpile_erb(erb)
     case erb.children
     in [nil, _, code, _]
-      [:erb, "neq_erb---#{unpack_code(code)}\n"]
+      add_new_frame!(generate_el_name)
+      erb.children.filter { |i| !i.nil? }.each do |n|
+        transpiled = transpile_ast(n)
+        current_frame.push!(transpiled)
+      end
+      [:container, collect_result]
     in [_indicator, _, code, _]
       [:erb, add_to_inner_html("\#{#{unpack_code(code)}}")]
     else
@@ -97,19 +104,19 @@ class Transpiler
     add_new_frame!(current_frame.name)
     node.children.each do |n|
       transpiled = transpile_ast(n)
-      current_frame.push!(transpiled) unless transpiled.nil?
+      current_frame.push!(transpiled)
     end
-    [:container, collect_result(@frames.pop)]
+    [:container, collect_result]
   end
 
   def transpile_tag(node)
     tag = BetterHtml::Tree::Tag.from_node(node)
     if tag.closing?
-      [:container, collect_result(@frames.pop)]
+      [:container, collect_result]
     else
       el_name = generate_el_name
-      current_frame.push!([el_name, "#{el_name} = doc.createElement('#{tag.name}')\n"])
       add_new_frame!(el_name)
+      [el_name, "#{el_name} = doc.createElement('#{tag.name}')\n"]
     end
   end
 
