@@ -4,7 +4,7 @@ require 'better_html'
 require 'better_html/parser'
 require 'better_html/tree/tag'
 
-module Werb
+module WERB
   # Stack Frame Class
   class Frame
     attr_reader :name, :elems
@@ -29,7 +29,7 @@ module Werb
     end
 
     def transpile
-      transpile_ast(@parser.ast)
+      transpile_ast(@parser.ast)[1]
     end
 
     private

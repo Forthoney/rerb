@@ -1,0 +1,43 @@
+module WERB
+  # Stack Frame Class
+  class Frame
+    attr_reader name: String
+
+    attr_reader elems: Array[transpiled_node]
+
+    def initialize: (String name) -> void
+
+    def push!: (transpiled_node elem) -> nil
+  end
+
+  # Compile ERB into ruby.wasm compatible code
+  class Transpiler
+    def initialize: (String source) -> void
+
+    def transpile: () -> String
+
+    private
+
+    def current_frame: () -> Frame
+
+    def create_parser: (String source) -> untyped
+
+    def collect_result: () -> String
+
+    def transpile_ast: (raw_ast_node node) -> transpiled_node
+
+    def add_new_frame!: (String name) -> nil
+
+    def generate_el_name: () -> String
+
+    def transpile_erb: (raw_ast_node erb) -> erb_node
+
+    def transpile_container: (raw_ast_node node) -> container_node
+
+    def transpile_tag: (raw_ast_node node) -> (container_node | elem_creation_node)
+
+    def unpack_code: (raw_ast_node block) -> String
+
+    def add_to_inner_html: (String elem) -> String
+  end
+end

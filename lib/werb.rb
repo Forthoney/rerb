@@ -2,7 +2,7 @@
 
 require_relative 'werb/version'
 
-module Werb
+module WERB
   class Error < StandardError; end
   # Your code goes here...
 end
