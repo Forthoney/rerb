@@ -53,7 +53,7 @@ module WERB
 
       frame.elems.reduce('') do |acc, elem|
         case elem
-        in [:string | :erb | :container, content]
+        in [:string | :erb | :container | :code, content]
           "#{acc}#{content}"
         in [el_name, content]
           "#{acc}#{content}#{current_frame.name}.appendChild(#{el_name})\n"
@@ -64,7 +64,7 @@ module WERB
     end
 
     def transpile_ast(node)
-      return [:string, add_to_inner_html(node)] if node.is_a?(String)
+      return [:string, add_to_inner_text(node)] if node.is_a?(String)
 
       case node.type
       when :tag
@@ -100,7 +100,7 @@ module WERB
         end
         [:container, collect_result]
       in [_indicator, _, code, _]
-        [:erb, add_to_inner_html("\#{#{unpack_code(code)}}")]
+        [:erb, add_to_inner_text("\#{#{unpack_code(code)}}")]
       else
         raise StandardError
       end
@@ -130,8 +130,8 @@ module WERB
       block.children[0].strip
     end
 
-    def add_to_inner_html(elem)
-      "#{current_frame.name}[:innerHTML] += \"#{elem}\"\n"
+    def add_to_inner_text(elem)
+      "#{current_frame.name}[:innerText] += \"#{elem}\"\n"
     end
   end
 end

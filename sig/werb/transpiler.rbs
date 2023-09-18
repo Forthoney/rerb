@@ -43,6 +43,6 @@ module WERB
 
     def unpack_code: (raw_ast_node block) -> String
 
-    def add_to_inner_html: (String elem) -> String
+    def add_to_inner_text: (String elem) -> String
   end
 end
