@@ -1,5 +1,9 @@
 AllCops:
   TargetRubyVersion: 3.2
+  NewCops: enable
+
+Gemspec/RequireMFA:
+  Enabled: false
 
 Style/StringLiterals:
   Enabled: true
@@ -14,3 +18,13 @@ Layout/LineLength:
 
 Metrics/MethodLength:
   Max: 15
+
+Layout/FirstArgumentIndentation:
+  Enabled: true
+  Exclude:
+    - 'spec/*'
+
+Style/RedundantPercentQ:
+  Enabled: true  
+  Exclude:
+    - 'spec/*'

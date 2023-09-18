@@ -22,10 +22,11 @@ module WERB
 
   # Compile ERB into ruby.wasm compatible code
   class Transpiler
-    def initialize(source)
+    def initialize(source, root_elem_name = 'document')
       @counter = 0
       @parser = create_parser(source)
-      @frames = [Frame.new('document')]
+      @root_elem_name = root_elem_name
+      @frames = [Frame.new(@root_elem_name)]
     end
 
     def transpile
@@ -42,9 +43,7 @@ module WERB
     end
 
     def create_parser(source)
-      template = File.open(source).read.delete("\n")
-      buffer = Parser::Source::Buffer.new('(buffer)')
-      buffer.source = template
+      buffer = Parser::Source::Buffer.new('(buffer)', source:)
       BetterHtml::Parser.new(buffer)
     end
 
@@ -123,7 +122,7 @@ module WERB
       else
         el_name = generate_el_name
         add_new_frame!(el_name)
-        [el_name, "#{el_name} = doc.createElement('#{tag.name}')\n"]
+        [el_name, "#{el_name} = #{@root_elem_name}.createElement('#{tag.name}')\n"]
       end
     end
 
