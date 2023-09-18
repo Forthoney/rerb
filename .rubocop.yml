@@ -1,3 +1,5 @@
+require: rubocop-rspec
+
 AllCops:
   TargetRubyVersion: 3.2
   NewCops: enable
@@ -15,6 +17,8 @@ Style/StringLiteralsInInterpolation:
 
 Layout/LineLength:
   Max: 120
+  Exclude:
+  - 'werb.gemspec'
 
 Metrics/MethodLength:
   Max: 15
@@ -25,6 +29,7 @@ Layout/FirstArgumentIndentation:
     - 'spec/*'
 
 Style/RedundantPercentQ:
-  Enabled: true  
+  Enabled: true
   Exclude:
     - 'spec/*'
+
