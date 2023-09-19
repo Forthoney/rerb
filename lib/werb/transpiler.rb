@@ -58,7 +58,7 @@ module WERB
         in [el_name, content]
           "#{acc}#{content}#{current_frame.name}.appendChild(#{el_name})\n"
         else
-          raise StandardError, "\n#{elem} cannot be parsed.\nCurrent frame: #{self}"
+          raise StandardError, "\n#{elem} cannot be parsed.\nCurrent frame: #{frame}"
         end
       end
     end
@@ -90,15 +90,10 @@ module WERB
       "@el#{@counter}"
     end
 
-    def transpile_erb(erb)
-      case erb.children
+    def transpile_erb(node)
+      case node.children
       in [nil, _, code, _]
-        add_new_frame!(generate_el_name)
-        erb.children.filter { |i| !i.nil? }.each do |n|
-          transpiled = transpile_ast(n)
-          current_frame.push!(transpiled)
-        end
-        [:container, collect_result]
+        transpile_container(node)
       in [_indicator, _, code, _]
         [:erb, add_to_inner_text("\#{#{unpack_code(code)}}")]
       else
@@ -108,7 +103,7 @@ module WERB
 
     def transpile_container(node)
       add_new_frame!(current_frame.name)
-      node.children.each do |n|
+      node.children.filter { |i| !i.nil? }.each do |n|
         transpiled = transpile_ast(n)
         current_frame.push!(transpiled)
       end
