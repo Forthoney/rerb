@@ -5,7 +5,7 @@ RSpec.describe WERB::Transpiler do
     transpiler = described_class.new('<h1></h1>')
     expect(transpiler.transpile).to eq(
       %q(@el1 = document.createElement('h1')
-document.appendChild(@el1)
+root.appendChild(@el1)
 )
     )
   end
@@ -14,7 +14,7 @@ document.appendChild(@el1)
     transpiler = described_class.new('<h1>Hello World</h1>')
     expect(transpiler.transpile).to eq(
       %q(@el1 = document.createElement('h1')
-document.appendChild(@el1)
+root.appendChild(@el1)
 @el1[:innerText] += "Hello World"
 )
     )
@@ -24,10 +24,9 @@ document.appendChild(@el1)
     transpiler = described_class.new('<h1></h1><h2></h2>')
     expect(transpiler.transpile).to eq(
       %q(@el1 = document.createElement('h1')
-@el1[:innerHTML] = ''
-document.appendChild(@el1)
+root.appendChild(@el1)
 @el2 = document.createElement('h2')
-document.appendChild(@el2)
+root.appendChild(@el2)
 )
     )
   end
@@ -36,10 +35,10 @@ document.appendChild(@el2)
     transpiler = described_class.new('<h1>Hello</h1><h2>World</h2>')
     expect(transpiler.transpile).to eq(
       %q(@el1 = document.createElement('h1')
-document.appendChild(@el1)
+root.appendChild(@el1)
 @el1[:innerText] += "Hello"
 @el2 = document.createElement('h2')
-document.appendChild(@el2)
+root.appendChild(@el2)
 @el2[:innerText] += "World"
 )
     )
@@ -49,7 +48,7 @@ document.appendChild(@el2)
     transpiler = described_class.new('<h1><h2></h2></h1>')
     expect(transpiler.transpile).to eq(
       %q(@el1 = document.createElement('h1')
-document.appendChild(@el1)
+root.appendChild(@el1)
 @el2 = document.createElement('h2')
 @el1.appendChild(@el2)
 )
@@ -60,7 +59,7 @@ document.appendChild(@el1)
     transpiler = described_class.new('<h1><h2>Hello World</h2></h1>')
     expect(transpiler.transpile).to eq(
       %q(@el1 = document.createElement('h1')
-document.appendChild(@el1)
+root.appendChild(@el1)
 @el2 = document.createElement('h2')
 @el1.appendChild(@el2)
 @el2[:innerText] += "Hello World"
@@ -72,7 +71,7 @@ document.appendChild(@el1)
     transpiler = described_class.new('<h1>Hiyo<h2>Hello World</h2></h1>')
     expect(transpiler.transpile).to eq(
       %q(@el1 = document.createElement('h1')
-document.appendChild(@el1)
+root.appendChild(@el1)
 @el1[:innerText] += "Hiyo"
 @el2 = document.createElement('h2')
 @el1.appendChild(@el2)
@@ -83,14 +82,14 @@ document.appendChild(@el1)
 
   it 'transpiles erb expression' do
     transpiler = described_class.new('<%= foo %>')
-    expect(transpiler.transpile).to eq("document[:innerText] += \"\#{foo}\"\n")
+    expect(transpiler.transpile).to eq("root[:innerText] += \"\#{foo}\"\n")
   end
 
   it 'transpiles nested erb expression' do
     transpiler = described_class.new('<h1><%= foo %></h1>')
     expect(transpiler.transpile).to eq(
       %q(@el1 = document.createElement('h1')
-document.appendChild(@el1)
+root.appendChild(@el1)
 @el1[:innerText] += "#{foo}"
 )
     )
@@ -100,7 +99,7 @@ document.appendChild(@el1)
     transpiler = described_class.new('<% if true %>Hello World<% end %>')
     expect(transpiler.transpile).to eq(
       %q(if true
-document[:innerText] += "Hello World"
+root[:innerText] += "Hello World"
 end
 )
     )

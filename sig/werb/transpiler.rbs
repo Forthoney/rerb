@@ -14,10 +14,10 @@ module WERB
   class Transpiler
     @counter: Integer
     @parser: untyped
-    @root_elem_name: String
+    @document_name: String
     @frames: Array[Frame]
 
-    def initialize: (String source, String root_elem_name) -> void
+    def initialize: (String source, String, document_name, String root_elem_name) -> void
 
     def transpile: () -> String
 

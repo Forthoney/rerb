@@ -22,11 +22,11 @@ module WERB
 
   # Compile ERB into ruby.wasm compatible code
   class Transpiler
-    def initialize(source, root_elem_name = 'document')
+    def initialize(source, document_name = 'document', root_elem_name = 'root')
       @counter = 0
       @parser = create_parser(source)
-      @root_elem_name = root_elem_name
-      @frames = [Frame.new(@root_elem_name)]
+      @document_name = document_name
+      @frames = [Frame.new(root_elem_name)]
     end
 
     def transpile
@@ -122,7 +122,7 @@ module WERB
       else
         el_name = generate_el_name
         add_new_frame!(el_name)
-        [el_name, "#{el_name} = #{@root_elem_name}.createElement('#{tag.name}')\n"]
+        [el_name, "#{el_name} = #{@document_name}.createElement('#{tag.name}')\n"]
       end
     end
 
