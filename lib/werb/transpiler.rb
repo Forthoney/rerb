@@ -22,10 +22,14 @@ module WERB
 
   # Compile ERB into ruby.wasm compatible code
   class Transpiler
-    def initialize(source, document_name = 'document', root_elem_name = 'root')
+    def initialize(source,
+                   document_name = 'document',
+                   root_elem_name = 'root',
+                   el_name_prefix = "@el")
       @counter = 0
       @parser = create_parser(source)
       @document_name = document_name
+      @el_name_prefix = el_name_prefix
       @frames = [Frame.new(root_elem_name)]
     end
 
@@ -87,12 +91,12 @@ module WERB
 
     def generate_el_name
       @counter += 1
-      "@el#{@counter}"
+      "#{@el_name_prefix}#{@counter}"
     end
 
     def transpile_erb(node)
       case node.children
-      in [nil, _, code, _]
+      in [nil, _, _code, _]
         transpile_container(node)
       in [_indicator, _, code, _]
         [:erb, add_to_inner_text("\#{#{unpack_code(code)}}")]
@@ -126,7 +130,8 @@ module WERB
     end
 
     def add_to_inner_text(elem)
-      "#{current_frame.name}[:innerText] += \"#{elem}\"\n"
+      # Hack to get around the inability to do [:innerText] += "new text"
+      "#{current_frame.name}[:innerText] = #{current_frame.name}[:innerText].to_s + \"#{elem}\"\n"
     end
   end
 end

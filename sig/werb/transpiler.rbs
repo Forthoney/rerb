@@ -15,9 +15,13 @@ module WERB
     @counter: Integer
     @parser: untyped
     @document_name: String
+    @el_name_prefix: String
     @frames: Array[Frame]
 
-    def initialize: (String source, String, document_name, String root_elem_name) -> void
+    def initialize: (String source,
+                     String, document_name,
+                     String root_elem_name,
+                     String el_name_prefix) -> void
 
     def transpile: () -> String
 

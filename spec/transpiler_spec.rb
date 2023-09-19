@@ -15,7 +15,7 @@ root.appendChild(@el1)
     expect(transpiler.transpile).to eq(
       %q(@el1 = document.createElement('h1')
 root.appendChild(@el1)
-@el1[:innerText] += "Hello World"
+@el1[:innerText] = @el1[:innerText].to_s + "Hello World"
 )
     )
   end
@@ -36,10 +36,10 @@ root.appendChild(@el2)
     expect(transpiler.transpile).to eq(
       %q(@el1 = document.createElement('h1')
 root.appendChild(@el1)
-@el1[:innerText] += "Hello"
+@el1[:innerText] = @el1[:innerText].to_s + "Hello"
 @el2 = document.createElement('h2')
 root.appendChild(@el2)
-@el2[:innerText] += "World"
+@el2[:innerText] = @el2[:innerText].to_s + "World"
 )
     )
   end
@@ -62,7 +62,7 @@ root.appendChild(@el1)
 root.appendChild(@el1)
 @el2 = document.createElement('h2')
 @el1.appendChild(@el2)
-@el2[:innerText] += "Hello World"
+@el2[:innerText] = @el2[:innerText].to_s + "Hello World"
 )
     )
   end
@@ -72,17 +72,17 @@ root.appendChild(@el1)
     expect(transpiler.transpile).to eq(
       %q(@el1 = document.createElement('h1')
 root.appendChild(@el1)
-@el1[:innerText] += "Hiyo"
+@el1[:innerText] = @el1[:innerText].to_s + "Hiyo"
 @el2 = document.createElement('h2')
 @el1.appendChild(@el2)
-@el2[:innerText] += "Hello World"
+@el2[:innerText] = @el2[:innerText].to_s + "Hello World"
 )
     )
   end
 
   it 'transpiles erb expression' do
     transpiler = described_class.new('<%= foo %>')
-    expect(transpiler.transpile).to eq("root[:innerText] += \"\#{foo}\"\n")
+    expect(transpiler.transpile).to eq("root[:innerText] = root[:innerText].to_s + \"\#{foo}\"\n")
   end
 
   it 'transpiles nested erb expression' do
@@ -90,7 +90,7 @@ root.appendChild(@el1)
     expect(transpiler.transpile).to eq(
       %q(@el1 = document.createElement('h1')
 root.appendChild(@el1)
-@el1[:innerText] += "#{foo}"
+@el1[:innerText] = @el1[:innerText].to_s + "#{foo}"
 )
     )
   end
@@ -99,7 +99,7 @@ root.appendChild(@el1)
     transpiler = described_class.new('<% if true %>Hello World<% end %>')
     expect(transpiler.transpile).to eq(
       %q(if true
-root[:innerText] += "Hello World"
+root[:innerText] = root[:innerText].to_s + "Hello World"
 end
 )
     )
