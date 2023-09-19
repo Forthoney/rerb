@@ -77,17 +77,11 @@ module WERB
         transpile_container(node)
       when :erb
         transpile_erb(node)
-      when :attribute
-        transpile_attribute(node)
       when :code
         [:code, "#{unpack_code(node)}\n"]
       else
         raise StandardError, 'Failed to transpile'
       end
-    end
-
-    def transpile_attribute(node)
-      node.children[0].text
     end
 
     def transpile_erb(node)
@@ -117,7 +111,14 @@ module WERB
       else
         el_name = generate_el_name
         add_new_frame!(el_name)
-        [el_name, "#{el_name} = #{@document_name}.createElement('#{tag.name}')\n"]
+
+        # better_html currently does not support reduce
+        tag_str = ''
+        tag.attributes.each do |attr|
+          tag_str += "#{el_name}.setAttribute('#{attr.name}', '#{attr.value}')\n"
+        end
+
+        [el_name, "#{el_name} = #{@document_name}.createElement('#{tag.name}')\n#{tag_str}"]
       end
     end
 

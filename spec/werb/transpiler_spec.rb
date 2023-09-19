@@ -108,4 +108,16 @@ end
       )
     end
   end
+
+  context 'with html elements containing attributes' do
+    it 'transpiles name-value attributes' do
+      transpiler = described_class.new('<div class="container"></div>')
+      expect(transpiler.transpile).to eq(
+        %q(@el1 = document.createElement('div')
+@el1.setAttribute('class', 'container')
+root.appendChild(@el1)
+)
+      )
+    end
+  end
 end
