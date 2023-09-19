@@ -25,7 +25,7 @@ module WERB
     def initialize(source,
                    document_name = 'document',
                    root_elem_name = 'root',
-                   el_name_prefix = "@el")
+                   el_name_prefix = '@el')
       @counter = 0
       @parser = create_parser(source)
       @document_name = document_name
@@ -77,6 +77,8 @@ module WERB
         transpile_container(node)
       when :erb
         transpile_erb(node)
+      when :attribute
+        transpile_attribute(node)
       when :code
         [:code, "#{unpack_code(node)}\n"]
       else
@@ -84,14 +86,8 @@ module WERB
       end
     end
 
-    def add_new_frame!(name)
-      @frames = @frames << Frame.new(name)
-      nil
-    end
-
-    def generate_el_name
-      @counter += 1
-      "#{@el_name_prefix}#{@counter}"
+    def transpile_attribute(node)
+      node.children[0].text
     end
 
     def transpile_erb(node)
@@ -123,6 +119,16 @@ module WERB
         add_new_frame!(el_name)
         [el_name, "#{el_name} = #{@document_name}.createElement('#{tag.name}')\n"]
       end
+    end
+
+    def add_new_frame!(name)
+      @frames = @frames << Frame.new(name)
+      nil
+    end
+
+    def generate_el_name
+      @counter += 1
+      "#{@el_name_prefix}#{@counter}"
     end
 
     def unpack_code(block)

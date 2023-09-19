@@ -19,7 +19,7 @@ module WERB
     @frames: Array[Frame]
 
     def initialize: (String source,
-                     String, document_name,
+                     String document_name,
                      String root_elem_name,
                      String el_name_prefix) -> void
 

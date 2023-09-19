@@ -31,5 +31,7 @@ Layout/FirstArgumentIndentation:
 Style/RedundantPercentQ:
   Enabled: true
   Exclude:
-    - 'spec/*'
+    - 'spec/werb/transpiler_spec.rb'
 
+RSpec/ExampleLength:
+  Enabled: false
