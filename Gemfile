@@ -12,3 +12,5 @@ gem 'rspec', '~> 3.0'
 gem 'rubocop', '~> 1.21'
 
 gem 'rubocop-rspec', require: false
+
+gem 'better_html'
