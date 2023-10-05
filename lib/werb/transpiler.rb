@@ -39,13 +39,6 @@ module WERB
 
     private
 
-    def current_frame
-      frame = @frames.last
-      raise StandardError, 'No Frames' if frame.nil?
-
-      frame
-    end
-
     def create_parser(source)
       buffer = Parser::Source::Buffer.new('(buffer)', source:)
       BetterHtml::Parser.new(buffer)
@@ -124,7 +117,14 @@ module WERB
 
     def add_new_frame!(name)
       @frames = @frames << Frame.new(name)
-      nil
+      return
+    end
+
+    def current_frame
+      frame = @frames.last
+      raise StandardError, 'Frames list is empty' if frame.nil?
+
+      frame
     end
 
     def generate_el_name
