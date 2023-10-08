@@ -35,15 +35,17 @@ module WERB
 
     def transpile_ast: (raw_ast_node node) -> transpiled_node
 
-    def add_new_frame!: (String name) -> nil
-
-    def generate_el_name: () -> String
-
     def transpile_erb: (raw_ast_node erb) -> erb_node
 
     def transpile_container: (raw_ast_node node) -> container_node
 
     def transpile_tag: (raw_ast_node node) -> (container_node | elem_creation_node)
+
+    def write_attr_string: (untyped attr, String el_name) -> String
+
+    def add_new_frame: (String name) -> Array[Frame]
+
+    def generate_el_name: () -> String
 
     def unpack_code: (raw_ast_node block) -> String
 

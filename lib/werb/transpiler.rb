@@ -89,7 +89,7 @@ module WERB
     end
 
     def transpile_container(node)
-      add_new_frame!(current_frame.name)
+      @frames = append_new_frame(current_frame.name)
       node.children.filter { |i| !i.nil? }.each do |n|
         transpiled = transpile_ast(n)
         current_frame.push!(transpiled)
@@ -103,21 +103,30 @@ module WERB
         [:container, collect_result]
       else
         el_name = generate_el_name
-        add_new_frame!(el_name)
+        @frames = append_new_frame(el_name)
 
-        # better_html currently does not support reduce
-        tag_str = ''
-        tag.attributes.each do |attr|
-          tag_str += "#{el_name}.setAttribute('#{attr.name}', '#{attr.value}')\n"
-        end
+        attr_list = node.children[2]
+        tag_str = transpile_attributes_list(attr_list, el_name)
 
         [el_name, "#{el_name} = #{@document_name}.createElement('#{tag.name}')\n#{tag_str}"]
       end
     end
 
-    def add_new_frame!(name)
-      @frames = @frames << Frame.new(name)
-      return
+    def transpile_attributes_list(node, el_name)
+      return '' if node.nil?
+
+      node.children.filter { |i| !i.nil? }.reduce('') do |acc, attr|
+        attr = BetterHtml::Tree::Attribute.from_node(attr)
+        if attr.name[0...2] == 'on'
+          "#{acc}#{el_name}.addEventListener('#{attr.name[2...]}', '#{attr.value}')\n"
+        else
+          "#{acc}#{el_name}.setAttribute('#{attr.name}', '#{attr.value}')\n"
+        end
+      end
+    end
+
+    def append_new_frame(name)
+      @frames << Frame.new(name)
     end
 
     def current_frame
@@ -137,7 +146,6 @@ module WERB
     end
 
     def add_to_inner_text(elem)
-      # Hack to get around the inability to do [:innerText] += "new text"
       "#{current_frame.name}[:innerText] = #{current_frame.name}[:innerText].to_s + \"#{elem}\"\n"
     end
   end

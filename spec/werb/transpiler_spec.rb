@@ -109,12 +109,22 @@ end
     end
   end
 
-  context 'with html elements containing attributes' do
+  context 'with html elements containing an attribute' do
     it 'transpiles name-value attributes' do
       transpiler = described_class.new('<div class="container"></div>')
       expect(transpiler.transpile).to eq(
         %q(@el1 = document.createElement('div')
 @el1.setAttribute('class', 'container')
+root.appendChild(@el1)
+)
+      )
+    end
+
+    it 'transpiles event attributes' do
+      transpiler = described_class.new('<div onclick=<%= lambda { |e| p e } %>></div>')
+      expect(transpiler.transpile).to eq(
+        %q(@el1 = document.createElement('div')
+@el1.addEventListener('click', lambda { |e| p e })
 root.appendChild(@el1)
 )
       )
