@@ -41,9 +41,9 @@ module WERB
 
     def transpile_tag: (raw_ast_node node) -> (container_node | elem_creation_node)
 
-    def write_attr_string: (untyped attr, String el_name) -> String
+    def extract_attributes: (untyped attr, String el_name) -> String
 
-    def add_new_frame: (String name) -> Array[Frame]
+    def append_new_frame: (String name) -> Array[Frame]
 
     def generate_el_name: () -> String
 

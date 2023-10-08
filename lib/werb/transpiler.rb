@@ -106,16 +106,18 @@ module WERB
         @frames = append_new_frame(el_name)
 
         attr_list = node.children[2]
-        tag_str = transpile_attributes_list(attr_list, el_name)
+        attr_str = extract_attributes(attr_list, el_name)
 
-        [el_name, "#{el_name} = #{@document_name}.createElement('#{tag.name}')\n#{tag_str}"]
+        [el_name, "#{el_name} = #{@document_name}.createElement('#{tag.name}')\n#{attr_str}"]
       end
     end
 
-    def transpile_attributes_list(node, el_name)
+    def extract_attributes(node, el_name)
       return '' if node.nil?
 
       node.children.filter { |i| !i.nil? }.reduce('') do |acc, attr|
+        # TODO: Instead of using Attribute#from_node, need to manually decompose the value
+        # This is needed for proper code interpolation
         attr = BetterHtml::Tree::Attribute.from_node(attr)
         if attr.name[0...2] == 'on'
           "#{acc}#{el_name}.addEventListener('#{attr.name[2...]}', '#{attr.value}')\n"
