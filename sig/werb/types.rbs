@@ -1,11 +1,12 @@
 module WERB
-  type container_node = [:container, String]
-  # special node corresponding to doc.createElement
-  type elem_creation_node = [String, String]
-  type erb_node = [:erb, String]
-  type string_node = [:string, String]
-  type code_node = [:code, String]
+  class DomElem
+    class ERB end
+    class Container end
+    class Code end
+    class Creator end
+    class Str end
+  end
 
-  type transpiled_node = container_node | erb_node | string_node | elem_creation_node
+  type dom_elem = DomElem::Str | DomElem::ERB | DomElem::Code | DomElem::Container | DomElem::Creator
   type raw_ast_node = String | untyped
 end

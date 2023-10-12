@@ -3,11 +3,11 @@ module WERB
   class Frame
     attr_reader name: String
 
-    attr_reader elems: Array[transpiled_node]
+    attr_reader elems: Array[dom_elem]
 
     def initialize: (String name) -> void
 
-    def push!: (transpiled_node elem) -> nil
+    def push!: (dom_elem elem) -> nil
   end
 
   # Compile ERB into ruby.wasm compatible code
@@ -33,13 +33,13 @@ module WERB
 
     def collect_result: () -> String
 
-    def transpile_ast: (raw_ast_node node) -> transpiled_node
+    def transpile_ast: (raw_ast_node node) -> dom_elem
 
-    def transpile_erb: (raw_ast_node erb) -> erb_node
+    def erb_to_dom: (raw_ast_node node) -> (WERB::DomElem::Container | WERB::DomElem::Container)
 
-    def transpile_container: (raw_ast_node node) -> container_node
+    def container_to_dom: (raw_ast_node node) -> WERB::DomElem::Container
 
-    def transpile_tag: (raw_ast_node node) -> (container_node | elem_creation_node)
+    def tag_to_dom: (raw_ast_node node) -> (WERB::DomElem::Container | WERB::DomElem::Creator)
 
     def extract_attributes: (untyped attr, String el_name) -> String
 

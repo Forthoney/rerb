@@ -4,6 +4,9 @@ require 'better_html'
 require 'better_html/parser'
 require 'better_html/tree/tag'
 
+require 'werb'
+require 'werb/dom_elem'
+
 module WERB
   # Stack Frame Class
   class Frame
@@ -34,7 +37,7 @@ module WERB
     end
 
     def transpile
-      transpile_ast(@parser.ast)[1]
+      transpile_ast(@parser.ast).content
     end
 
     private
@@ -50,9 +53,9 @@ module WERB
 
       frame.elems.reduce('') do |acc, elem|
         case elem
-        in [:string | :erb | :container | :code, content]
-          "#{acc}#{content}"
-        in [el_name, content]
+        in DomElem::Str | DomElem::ERB | DomElem::Code | DomElem::Container
+          "#{acc}#{elem.content}"
+        in DomElem::Creator(el_name, content)
           "#{acc}#{content}#{current_frame.name}.appendChild(#{el_name})\n"
         else
           raise StandardError, "\n#{elem} cannot be parsed.\nCurrent frame: #{frame}"
@@ -61,46 +64,46 @@ module WERB
     end
 
     def transpile_ast(node)
-      return [:string, add_to_inner_text(node)] if node.is_a?(String)
+      return DomElem::Str[add_to_inner_text(node)] if node.is_a?(String)
 
       case node.type
       when :tag
-        transpile_tag(node)
+        tag_to_dom(node)
       when :text, :document
-        transpile_container(node)
+        container_to_dom(node)
       when :erb
-        transpile_erb(node)
+        erb_to_dom(node)
       when :code
-        [:code, "#{unpack_code(node)}\n"]
+        CodeElem["#{unpack_code(node)}\n"]
       else
         raise StandardError, 'Failed to transpile'
       end
     end
 
-    def transpile_erb(node)
+    def erb_to_dom(node)
       case node.children
       in [nil, _, _code, _]
-        transpile_container(node)
+        container_to_dom(node)
       in [_indicator, _, code, _]
-        [:erb, add_to_inner_text("\#{#{unpack_code(code)}}")]
+        DomElem::ERB[add_to_inner_text("\#{#{unpack_code(code)}}")]
       else
         raise StandardError
       end
     end
 
-    def transpile_container(node)
+    def container_to_dom(node)
       @frames = append_new_frame(current_frame.name)
       node.children.filter { |i| !i.nil? }.each do |n|
         transpiled = transpile_ast(n)
         current_frame.push!(transpiled)
       end
-      [:container, collect_result]
+      DomElem::Container[collect_result]
     end
 
-    def transpile_tag(node)
+    def tag_to_dom(node)
       tag = BetterHtml::Tree::Tag.from_node(node)
       if tag.closing?
-        [:container, collect_result]
+        DomElem::Container[collect_result]
       else
         el_name = generate_el_name
         @frames = append_new_frame(el_name)
@@ -108,7 +111,7 @@ module WERB
         attr_list = node.children[2]
         attr_str = extract_attributes(attr_list, el_name)
 
-        [el_name, "#{el_name} = #{@document_name}.createElement('#{tag.name}')\n#{attr_str}"]
+        DomElem::Creator[el_name, "#{el_name} = #{@document_name}.createElement('#{tag.name}')\n#{attr_str}"]
       end
     end
 
