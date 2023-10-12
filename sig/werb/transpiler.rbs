@@ -1,54 +1,43 @@
-module WERB
-  # Stack Frame Class
-  class Frame
-    attr_reader name: String
-
-    attr_reader elems: Array[dom_elem]
-
-    def initialize: (String name) -> void
-
-    def push!: (dom_elem elem) -> nil
+# Classes
+module BetterHtml
+  class Parser
+    def initialize: (untyped buffer) -> void
+    def ast: -> AST::Node
   end
 
-  # Compile ERB into ruby.wasm compatible code
+  module AST
+    class Node
+      attr_reader children: Array[Node | String]
+      attr_reader type: Symbol
+    end
+  end
+end
+
+module WERB
+  Frame: untyped
+
   class Transpiler
     @counter: Integer
-    @parser: untyped
+    @parser: BetterHtml::Parser
     @document_name: String
     @el_name_prefix: String
-    @frames: Array[Frame]
+    @frames: Array[untyped]
 
-    def initialize: (String source,
-                     String document_name,
-                     String root_elem_name,
-                     String el_name_prefix) -> void
+    def initialize: (String source, ?String document_name, ?String root_elem_name, ?String el_name_prefix) -> void
 
-    def transpile: () -> String
+    def transpile: -> String
 
     private
-
-    def current_frame: () -> Frame
-
-    def create_parser: (String source) -> untyped
-
-    def compile_dom_elem: () -> String
-
-    def transpile_ast: (raw_ast_node node) -> dom_elem
-
-    def erb_to_dom: (raw_ast_node node) -> (WERB::DomElem::Container | WERB::DomElem::Container)
-
-    def container_to_dom: (raw_ast_node node) -> WERB::DomElem::Container
-
-    def tag_to_dom: (raw_ast_node node) -> (WERB::DomElem::Container | WERB::DomElem::Creator)
-
-    def code_to_dom: (raw_ast_node block) -> WERB::DomElem::Code
-
-    def extract_attributes: (untyped attr, String el_name) -> String
-
-    def append_new_frame: (String name) -> Array[Frame]
-
-    def generate_el_name: () -> String
-
-    def add_to_inner_text: (String elem) -> String
+    def create_parser: (String source) -> BetterHtml::Parser
+    def compile_dom_elem: (untyped frame) -> String
+    def transpile_ast: (BetterHtml::AST::Node | String node) -> untyped
+    def erb_to_dom: (BetterHtml::AST::Node node) -> untyped
+    def container_to_dom: (BetterHtml::AST::Node node) -> untyped
+    def tag_to_dom: (BetterHtml::AST::Node node) -> untyped
+    def code_to_dom: (BetterHtml::AST::Node node) -> untyped
+    def extract_attributes: (untyped node, String el_name) -> String
+    def current_frame: -> untyped
+    def generate_el_name: -> String
+    def add_to_inner_text: (BetterHtml::AST::Node | String elem) -> String
   end
 end

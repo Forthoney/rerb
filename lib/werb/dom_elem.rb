@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module WERB
-  class DomElem
+  module DomElem
     ERB = Data.define(:content)
     Container = Data.define(:content)
     Code = Data.define(:content)

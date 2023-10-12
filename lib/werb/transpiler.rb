@@ -8,18 +8,9 @@ require 'werb'
 require 'werb/dom_elem'
 
 module WERB
-  # Stack Frame Class
-  class Frame
-    attr_reader :name, :elems
-
-    def initialize(name)
-      @name = name
-      @elems = []
-    end
-
-    def push!(elem)
-      @elems = @elems << elem
-      nil
+  Frame = Data.define(:name, :elems) do
+    def initialize(name:, elems: [])
+      super(name:, elems:)
     end
   end
 
@@ -33,7 +24,7 @@ module WERB
       @parser = create_parser(source)
       @document_name = document_name
       @el_name_prefix = el_name_prefix
-      @frames = [Frame.new(root_elem_name)]
+      @frames = [Frame[root_elem_name]]
     end
 
     def transpile
@@ -47,8 +38,7 @@ module WERB
       BetterHtml::Parser.new(buffer)
     end
 
-    def compile_dom_elem
-      frame = @frames.pop
+    def compile_dom_elem(frame)
       raise EmptyFrameError if frame.nil?
 
       frame.elems.reduce('') do |acc, elem|
@@ -92,21 +82,21 @@ module WERB
     end
 
     def container_to_dom(node)
-      @frames = append_new_frame(current_frame.name)
+      @frames << Frame[current_frame.name]
       node.children.filter { |i| !i.nil? }.each do |n|
         transpiled = transpile_ast(n)
-        current_frame.push!(transpiled)
+        current_frame.elems << transpiled
       end
-      DomElem::Container[compile_dom_elem]
+      DomElem::Container[compile_dom_elem(@frames.pop)]
     end
 
     def tag_to_dom(node)
       tag = BetterHtml::Tree::Tag.from_node(node)
       if tag.closing?
-        DomElem::Container[compile_dom_elem]
+        DomElem::Container[compile_dom_elem(@frames.pop)]
       else
         el_name = generate_el_name
-        @frames = append_new_frame(el_name)
+        @frames << Frame[el_name]
 
         attr_list = node.children[2]
         attr_str = extract_attributes(attr_list, el_name)
@@ -116,7 +106,10 @@ module WERB
     end
 
     def code_to_dom(node)
-      DomElem::Code["#{node.children[0].strip}\n"]
+      code_block = node.children[0]
+      raise Error, "Code block contains unexpected child #{code_block}" unless code_block.is_a? String
+
+      DomElem::Code["#{code_block.strip}\n"]
     end
 
     def extract_attributes(node, el_name)
@@ -134,15 +127,8 @@ module WERB
       end
     end
 
-    def append_new_frame(name)
-      @frames << Frame.new(name)
-    end
-
     def current_frame
-      frame = @frames.last
-      raise EmptyFrameError if frame.nil?
-
-      frame
+      @frames.last or raise EmptyFrameError
     end
 
     def generate_el_name

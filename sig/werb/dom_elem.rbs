@@ -1,0 +1,13 @@
+module WERB
+  module DomElem
+    ERB: untyped
+
+    Container: untyped
+
+    Code: untyped
+
+    Str: untyped
+
+    Creator: untyped
+  end
+end
