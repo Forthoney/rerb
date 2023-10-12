@@ -1,19 +1,19 @@
 # frozen_string_literal: true
 
-RSpec.describe WERB::Transpiler do
+RSpec.describe WERB::Compiler do
   context 'with only pure html elements' do
-    it 'transpiles single element' do
-      transpiler = described_class.new('<h1></h1>')
-      expect(transpiler.transpile).to eq(
+    it 'compiles single element' do
+      compiler = described_class.new('<h1></h1>')
+      expect(compiler.compile).to eq(
         %q(@el1 = document.createElement('h1')
 root.appendChild(@el1)
 )
       )
     end
 
-    it 'transpiles single element with text' do
-      transpiler = described_class.new('<h1>Hello World</h1>')
-      expect(transpiler.transpile).to eq(
+    it 'compiles single element with text' do
+      compiler = described_class.new('<h1>Hello World</h1>')
+      expect(compiler.compile).to eq(
         %q(@el1 = document.createElement('h1')
 root.appendChild(@el1)
 @el1[:innerText] = @el1[:innerText].to_s + "Hello World"
@@ -21,9 +21,9 @@ root.appendChild(@el1)
       )
     end
 
-    it 'transpiles sibling elements' do
-      transpiler = described_class.new('<h1></h1><h2></h2>')
-      expect(transpiler.transpile).to eq(
+    it 'compiles sibling elements' do
+      compiler = described_class.new('<h1></h1><h2></h2>')
+      expect(compiler.compile).to eq(
         %q(@el1 = document.createElement('h1')
 root.appendChild(@el1)
 @el2 = document.createElement('h2')
@@ -32,9 +32,9 @@ root.appendChild(@el2)
       )
     end
 
-    it 'transpiles sibling elements with text' do
-      transpiler = described_class.new('<h1>Hello</h1><h2>World</h2>')
-      expect(transpiler.transpile).to eq(
+    it 'compiles sibling elements with text' do
+      compiler = described_class.new('<h1>Hello</h1><h2>World</h2>')
+      expect(compiler.compile).to eq(
         %q(@el1 = document.createElement('h1')
 root.appendChild(@el1)
 @el1[:innerText] = @el1[:innerText].to_s + "Hello"
@@ -45,9 +45,9 @@ root.appendChild(@el2)
       )
     end
 
-    it 'transpiles nested elements' do
-      transpiler = described_class.new('<h1><h2></h2></h1>')
-      expect(transpiler.transpile).to eq(
+    it 'compiles nested elements' do
+      compiler = described_class.new('<h1><h2></h2></h1>')
+      expect(compiler.compile).to eq(
         %q(@el1 = document.createElement('h1')
 root.appendChild(@el1)
 @el2 = document.createElement('h2')
@@ -56,9 +56,9 @@ root.appendChild(@el1)
       )
     end
 
-    it 'transpiles nested elements with text in child' do
-      transpiler = described_class.new('<h1><h2>Hello World</h2></h1>')
-      expect(transpiler.transpile).to eq(
+    it 'compiles nested elements with text in child' do
+      compiler = described_class.new('<h1><h2>Hello World</h2></h1>')
+      expect(compiler.compile).to eq(
         %q(@el1 = document.createElement('h1')
 root.appendChild(@el1)
 @el2 = document.createElement('h2')
@@ -68,9 +68,9 @@ root.appendChild(@el1)
       )
     end
 
-    it 'transpiles nested elements with text in child and parent' do
-      transpiler = described_class.new('<h1>Hiyo<h2>Hello World</h2></h1>')
-      expect(transpiler.transpile).to eq(
+    it 'compiles nested elements with text in child and parent' do
+      compiler = described_class.new('<h1>Hiyo<h2>Hello World</h2></h1>')
+      expect(compiler.compile).to eq(
         %q(@el1 = document.createElement('h1')
 root.appendChild(@el1)
 @el1[:innerText] = @el1[:innerText].to_s + "Hiyo"
@@ -83,14 +83,14 @@ root.appendChild(@el1)
   end
 
   context 'with ERB embeddings' do
-    it 'transpiles erb expression' do
-      transpiler = described_class.new('<%= foo %>')
-      expect(transpiler.transpile).to eq("root[:innerText] = root[:innerText].to_s + \"\#{foo}\"\n")
+    it 'compiles erb expression' do
+      compiler = described_class.new('<%= foo %>')
+      expect(compiler.compile).to eq("root[:innerText] = root[:innerText].to_s + \"\#{foo}\"\n")
     end
 
-    it 'transpiles nested erb expression' do
-      transpiler = described_class.new('<h1><%= foo %></h1>')
-      expect(transpiler.transpile).to eq(
+    it 'compiles nested erb expression' do
+      compiler = described_class.new('<h1><%= foo %></h1>')
+      expect(compiler.compile).to eq(
         %q(@el1 = document.createElement('h1')
 root.appendChild(@el1)
 @el1[:innerText] = @el1[:innerText].to_s + "#{foo}"
@@ -98,9 +98,9 @@ root.appendChild(@el1)
       )
     end
 
-    it 'transpiles erb statement' do
-      transpiler = described_class.new('<% if true %>Hello World<% end %>')
-      expect(transpiler.transpile).to eq(
+    it 'compiles erb statement' do
+      compiler = described_class.new('<% if true %>Hello World<% end %>')
+      expect(compiler.compile).to eq(
         %q(if true
 root[:innerText] = root[:innerText].to_s + "Hello World"
 end
@@ -110,9 +110,9 @@ end
   end
 
   context 'with html elements containing an attribute' do
-    it 'transpiles name-value attributes' do
-      transpiler = described_class.new('<div class="container"></div>')
-      expect(transpiler.transpile).to eq(
+    it 'compiles name-value attributes' do
+      compiler = described_class.new('<div class="container"></div>')
+      expect(compiler.compile).to eq(
         %q(@el1 = document.createElement('div')
 @el1.setAttribute('class', 'container')
 root.appendChild(@el1)
@@ -120,9 +120,9 @@ root.appendChild(@el1)
       )
     end
 
-    it 'transpiles event attributes' do
-      transpiler = described_class.new('<div onclick=<%= lambda { |e| p e } %>></div>')
-      expect(transpiler.transpile).to eq(
+    it 'compiles event attributes' do
+      compiler = described_class.new('<div onclick=<%= lambda { |e| p e } %>></div>')
+      expect(compiler.compile).to eq(
         %q(@el1 = document.createElement('div')
 @el1.addEventListener('click', lambda { |e| p e })
 root.appendChild(@el1)
@@ -132,9 +132,9 @@ root.appendChild(@el1)
   end
 
   context 'with html elements containing multiple attributes' do
-    it 'transpiles name-value attributes' do
-      transpiler = described_class.new('<div class="container" id="divider"></div>')
-      expect(transpiler.transpile).to eq(
+    it 'compiles name-value attributes' do
+      compiler = described_class.new('<div class="container" id="divider"></div>')
+      expect(compiler.compile).to eq(
         %q(@el1 = document.createElement('div')
 @el1.setAttribute('class', 'container')
 @el1.setAttribute('id', 'divider')

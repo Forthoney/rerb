@@ -15,7 +15,7 @@ module WERB
   end
 
   # Compile ERB into ruby.wasm compatible code
-  class Transpiler
+  class Compiler
     def initialize(source,
                    document_name = 'document',
                    root_elem_name = 'root',
@@ -27,8 +27,8 @@ module WERB
       @frames = [Frame[root_elem_name]]
     end
 
-    def transpile
-      transpile_ast(@parser.ast).content
+    def compile
+      compile_ast(@parser.ast).content
     end
 
     private
@@ -53,7 +53,7 @@ module WERB
       end
     end
 
-    def transpile_ast(node)
+    def compile_ast(node)
       return DomElem::Str[add_to_inner_text(node)] if node.is_a?(String)
 
       case node.type
@@ -71,7 +71,7 @@ module WERB
       in [nil, nil, _code, nil]
         container_to_dom(node)
       in [_indicator, nil, code, nil]
-        DomElem::ERB[add_to_inner_text("\#{#{transpile_ast(code).content.strip}}")]
+        DomElem::ERB[add_to_inner_text("\#{#{compile_ast(code).content.strip}}")]
       else
         raise PatternMatchError, "#{node.children} has unexpected patter for ERB"
       end
@@ -80,7 +80,7 @@ module WERB
     def container_to_dom(node)
       @frames << Frame[current_frame.name]
       node.children.filter { |i| !i.nil? }.each do |n|
-        transpiled = transpile_ast(n)
+        transpiled = compile_ast(n)
         current_frame.elems << transpiled
       end
       DomElem::Container[compile_dom_elem(@frames.pop)]

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'werb/version'
-require 'werb/transpiler'
+require 'werb/compiler'
 
 module WERB
   class Error < StandardError; end

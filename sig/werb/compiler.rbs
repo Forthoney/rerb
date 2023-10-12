@@ -16,7 +16,7 @@ end
 module WERB
   Frame: untyped
 
-  class Transpiler
+  class Compiler
     @counter: Integer
     @parser: BetterHtml::Parser
     @document_name: String
@@ -25,12 +25,12 @@ module WERB
 
     def initialize: (String source, ?String document_name, ?String root_elem_name, ?String el_name_prefix) -> void
 
-    def transpile: -> String
+    def compile: -> String
 
     private
     def create_parser: (String source) -> BetterHtml::Parser
     def compile_dom_elem: (untyped frame) -> String
-    def transpile_ast: (BetterHtml::AST::Node | String node) -> untyped
+    def compile_ast: (BetterHtml::AST::Node | String node) -> untyped
     def erb_to_dom: (BetterHtml::AST::Node node) -> untyped
     def container_to_dom: (BetterHtml::AST::Node node) -> untyped
     def tag_to_dom: (BetterHtml::AST::Node node) -> untyped
