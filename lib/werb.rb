@@ -5,5 +5,13 @@ require 'werb/transpiler'
 
 module WERB
   class Error < StandardError; end
-  # Your code goes here...
+
+  class PatternMatchError < Error; end
+
+  class EmptyFrameError < Error
+    def initialize(message = 'Frames list is empty')
+      super
+      @message = message
+    end
+  end
 end
