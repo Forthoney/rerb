@@ -57,14 +57,10 @@ module WERB
       return DomElem::Str[add_to_inner_text(node)] if node.is_a?(String)
 
       case node.type
-      when :tag
-        tag_to_dom(node)
+      when :tag, :erb, :code
+        send("#{node.type}_to_dom", node)
       when :text, :document
         container_to_dom(node)
-      when :erb
-        erb_to_dom(node)
-      when :code
-        code_to_dom(node)
       else
         raise PatternMatchError, "#{node} has unexpected type :#{node.type}"
       end
