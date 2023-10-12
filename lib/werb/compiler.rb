@@ -44,8 +44,11 @@ module WERB
       case node.type
       when :tag, :erb, :code, :attribute
         send("#{node.type}_to_dom", node)
-      when :text, :document
+      when :text, :document, :tag_attributes
         container_to_dom(node)
+      when :tag_name
+        # tag_name is handled by better_html library call
+        DomElem::Ignore[]
       else
         raise PatternMatchError, "#{node} has unexpected type :#{node.type}"
       end
@@ -56,10 +59,12 @@ module WERB
 
       frame.elems.reduce('') do |acc, elem|
         case elem
-        in DomElem::Str | DomElem::ERB | DomElem::Code | DomElem::Container
+        when DomElem::Str, DomElem::ERB, DomElem::Code, DomElem::Container, DomElem::Attr
           acc + elem.content.to_s
-        in DomElem::Creator(el_name, content)
-          acc + content.to_s + "#{current_frame.name}.appendChild(#{el_name})\n"
+        when DomElem::Creator
+          acc + elem.content.to_s + "#{current_frame.name}.appendChild(#{elem.el_name})\n"
+        when DomElem::Ignore
+          acc
         else
           raise PatternMatchError, "Element #{elem} cannot be parsed in current frame #{frame}"
         end
@@ -98,10 +103,27 @@ module WERB
         el_name = generate_el_name
         @frames.push(Frame[el_name])
 
-        attr_list = node.children[2]
-        attr_str = extract_attributes(attr_list, el_name)
+        attributes = container_to_dom(node).content
+        DomElem::Creator[el_name, "#{el_name} = #{@document_name}.createElement('#{tag.name}')\n#{attributes}"]
+      end
+    end
 
-        DomElem::Creator[el_name, "#{el_name} = #{@document_name}.createElement('#{tag.name}')\n#{attr_str}"]
+    def attribute_to_dom(node)
+      attr_name, _equal, attr_val = node.children
+      attr_name = attr_name.children[0]
+      case attr_val.children
+      in [_quote, text, _quote]
+        attr_val = "'#{text}'"
+      in [erb]
+        attr_val = compile_ast(erb.children[2]).content.strip
+      else
+        raise PatternMatchError, "Unexpected attribute values #{attr_val.children}"
+      end
+
+      if attr_name[0...2] == 'on'
+        DomElem::Attr["#{current_frame.name}.addEventListener('#{attr_name[2...]}', #{attr_val})\n"]
+      else
+        DomElem::Attr["#{current_frame.name}.setAttribute('#{attr_name}', #{attr_val})\n"]
       end
     end
 
@@ -110,35 +132,6 @@ module WERB
       raise Error, "Code block contains unexpected child #{code_block}" unless code_block.is_a? String
 
       DomElem::Code["#{code_block.strip}\n"]
-    end
-
-    def parse_attribute(node)
-      attr_name, _equal, attr_val = node.children
-      attr_name = attr_name.children[0]
-      case attr_val.children
-      in [_quote, text, _quote]
-        attr_value = "'#{text}'"
-      in [erb]
-        attr_value = compile_ast(erb.children[2]).content.strip
-      else
-        raise PatternMatchError
-      end
-
-      if attr_name[0...2] == 'on'
-        ".addEventListener('#{attr_name[2...]}', #{attr_value})\n"
-      else
-        ".setAttribute('#{attr_name}', #{attr_value})\n"
-      end
-    end
-
-    def extract_attributes(node, el_name)
-      return '' if node.nil?
-
-      node.children.compact.reduce('') do |acc, attr|
-        # TODO: Instead of using Attribute#from_node, need to manually decompose the value
-        # This is needed for proper code interpolation
-        acc + el_name + parse_attribute(attr)
-      end
     end
 
     def current_frame
@@ -155,5 +148,3 @@ module WERB
     end
   end
 end
-
-WERB::Compiler.new("<h1>Hello World</h1>").compile
