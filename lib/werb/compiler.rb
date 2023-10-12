@@ -38,6 +38,19 @@ module WERB
       BetterHtml::Parser.new(buffer)
     end
 
+    def compile_ast(node)
+      return DomElem::Str[add_to_inner_text(node)] if node.is_a?(String)
+
+      case node.type
+      when :tag, :erb, :code, :attribute
+        send("#{node.type}_to_dom", node)
+      when :text, :document
+        container_to_dom(node)
+      else
+        raise PatternMatchError, "#{node} has unexpected type :#{node.type}"
+      end
+    end
+
     def compile_dom_elem(frame)
       raise EmptyFrameError if frame.nil?
 
@@ -50,19 +63,6 @@ module WERB
         else
           raise PatternMatchError, "Element #{elem} cannot be parsed in current frame #{frame}"
         end
-      end
-    end
-
-    def compile_ast(node)
-      return DomElem::Str[add_to_inner_text(node)] if node.is_a?(String)
-
-      case node.type
-      when :tag, :erb, :code
-        send("#{node.type}_to_dom", node)
-      when :text, :document
-        container_to_dom(node)
-      else
-        raise PatternMatchError, "#{node} has unexpected type :#{node.type}"
       end
     end
 
@@ -81,10 +81,12 @@ module WERB
       @frames.push(Frame[current_frame.name])
 
       node.children.compact.each do |n|
-        # BUG: current_frame.elems.push(compile_ast(n)) produces incorrect val
-        transpiled = compile_ast(n)
-        current_frame.elems.push(transpiled)
+        # compile_ast must be evaluated BEFORE current_frame because current_frame
+        # must be reflective of the current frame after whatever mutations compile_ast did
+        compiled = compile_ast(n)
+        current_frame.elems.push(compiled)
       end
+
       DomElem::Container[compile_dom_elem(@frames.pop)]
     end
 
@@ -110,18 +112,32 @@ module WERB
       DomElem::Code["#{code_block.strip}\n"]
     end
 
+    def parse_attribute(node)
+      attr_name, _equal, attr_val = node.children
+      attr_name = attr_name.children[0]
+      case attr_val.children
+      in [_quote, text, _quote]
+        attr_value = "'#{text}'"
+      in [erb]
+        attr_value = compile_ast(erb.children[2]).content.strip
+      else
+        raise PatternMatchError
+      end
+
+      if attr_name[0...2] == 'on'
+        ".addEventListener('#{attr_name[2...]}', #{attr_value})\n"
+      else
+        ".setAttribute('#{attr_name}', #{attr_value})\n"
+      end
+    end
+
     def extract_attributes(node, el_name)
       return '' if node.nil?
 
       node.children.compact.reduce('') do |acc, attr|
         # TODO: Instead of using Attribute#from_node, need to manually decompose the value
         # This is needed for proper code interpolation
-        attr = BetterHtml::Tree::Attribute.from_node(attr)
-        if attr.name[0...2] == 'on'
-          acc + "#{el_name}.addEventListener('#{attr.name[2...]}', '#{attr.value}')\n"
-        else
-          acc + "#{el_name}.setAttribute('#{attr.name}', '#{attr.value}')\n"
-        end
+        acc + el_name + parse_attribute(attr)
       end
     end
 
@@ -139,3 +155,5 @@ module WERB
     end
   end
 end
+
+WERB::Compiler.new("<h1>Hello World</h1>").compile
