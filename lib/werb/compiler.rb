@@ -44,9 +44,9 @@ module WERB
       frame.elems.reduce('') do |acc, elem|
         case elem
         in DomElem::Str | DomElem::ERB | DomElem::Code | DomElem::Container
-          "#{acc}#{elem.content}"
+          acc + elem.content.to_s
         in DomElem::Creator(el_name, content)
-          "#{acc}#{content}#{current_frame.name}.appendChild(#{el_name})\n"
+          acc + content.to_s + "#{current_frame.name}.appendChild(#{el_name})\n"
         else
           raise PatternMatchError, "Element #{elem} cannot be parsed in current frame #{frame}"
         end
@@ -78,10 +78,12 @@ module WERB
     end
 
     def container_to_dom(node)
-      @frames << Frame[current_frame.name]
-      node.children.filter { |i| !i.nil? }.each do |n|
+      @frames.push(Frame[current_frame.name])
+
+      node.children.compact.each do |n|
+        # BUG: current_frame.elems.push(compile_ast(n)) produces incorrect val
         transpiled = compile_ast(n)
-        current_frame.elems << transpiled
+        current_frame.elems.push(transpiled)
       end
       DomElem::Container[compile_dom_elem(@frames.pop)]
     end
@@ -92,7 +94,7 @@ module WERB
         DomElem::Container[compile_dom_elem(@frames.pop)]
       else
         el_name = generate_el_name
-        @frames << Frame[el_name]
+        @frames.push(Frame[el_name])
 
         attr_list = node.children[2]
         attr_str = extract_attributes(attr_list, el_name)
@@ -111,14 +113,14 @@ module WERB
     def extract_attributes(node, el_name)
       return '' if node.nil?
 
-      node.children.filter { |i| !i.nil? }.reduce('') do |acc, attr|
+      node.children.compact.reduce('') do |acc, attr|
         # TODO: Instead of using Attribute#from_node, need to manually decompose the value
         # This is needed for proper code interpolation
         attr = BetterHtml::Tree::Attribute.from_node(attr)
         if attr.name[0...2] == 'on'
-          "#{acc}#{el_name}.addEventListener('#{attr.name[2...]}', '#{attr.value}')\n"
+          acc + "#{el_name}.addEventListener('#{attr.name[2...]}', '#{attr.value}')\n"
         else
-          "#{acc}#{el_name}.setAttribute('#{attr.name}', '#{attr.value}')\n"
+          acc + "#{el_name}.setAttribute('#{attr.name}', '#{attr.value}')\n"
         end
       end
     end
