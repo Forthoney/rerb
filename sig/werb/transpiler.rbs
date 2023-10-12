@@ -31,7 +31,7 @@ module WERB
 
     def create_parser: (String source) -> untyped
 
-    def collect_result: () -> String
+    def compile_dom_elem: () -> String
 
     def transpile_ast: (raw_ast_node node) -> dom_elem
 
@@ -41,13 +41,13 @@ module WERB
 
     def tag_to_dom: (raw_ast_node node) -> (WERB::DomElem::Container | WERB::DomElem::Creator)
 
+    def code_to_dom: (raw_ast_node block) -> WERB::DomElem::Code
+
     def extract_attributes: (untyped attr, String el_name) -> String
 
     def append_new_frame: (String name) -> Array[Frame]
 
     def generate_el_name: () -> String
-
-    def unpack_code: (raw_ast_node block) -> String
 
     def add_to_inner_text: (String elem) -> String
   end

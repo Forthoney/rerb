@@ -1,4 +1,15 @@
-module Werb
+module WERB
   VERSION: String
-  # See the writing guide of rbs: https://github.com/ruby/rbs#guides
+
+  class Error < StandardError
+  end
+
+  class PatternMatchError < Error
+  end
+
+  class EmptyFrameError < Error
+    @message: String
+
+    def initialize: (?::String message) -> void
+  end
 end
