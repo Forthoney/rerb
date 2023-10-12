@@ -1,13 +1,17 @@
 module WERB
   module DomElem
-    ERB: untyped
+    ERB: Data
 
-    Container: untyped
+    Container: Data
 
-    Code: untyped
+    Code: Data
 
-    Str: untyped
+    Str: Data
 
-    Creator: untyped
+    Creator: Data
+
+    Attr: Data
+
+    Ignore: Data
   end
 end
