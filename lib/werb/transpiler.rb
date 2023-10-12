@@ -47,9 +47,9 @@ module WERB
       BetterHtml::Parser.new(buffer)
     end
 
-    def collect_result
+    def compile_dom_elem
       frame = @frames.pop
-      raise StandardError, 'No frames to pop' if frame.nil?
+      raise EmptyFrameError if frame.nil?
 
       frame.elems.reduce('') do |acc, elem|
         case elem
@@ -58,7 +58,7 @@ module WERB
         in DomElem::Creator(el_name, content)
           "#{acc}#{content}#{current_frame.name}.appendChild(#{el_name})\n"
         else
-          raise StandardError, "\n#{elem} cannot be parsed.\nCurrent frame: #{frame}"
+          raise PatternMatchError, "Element #{elem} cannot be parsed in current frame #{frame}"
         end
       end
     end
@@ -74,20 +74,20 @@ module WERB
       when :erb
         erb_to_dom(node)
       when :code
-        CodeElem["#{unpack_code(node)}\n"]
+        code_to_dom(node)
       else
-        raise StandardError, 'Failed to transpile'
+        raise PatternMatchError, "#{node} has unexpected type :#{node.type}"
       end
     end
 
     def erb_to_dom(node)
       case node.children
-      in [nil, _, _code, _]
+      in [nil, nil, _code, nil]
         container_to_dom(node)
-      in [_indicator, _, code, _]
-        DomElem::ERB[add_to_inner_text("\#{#{unpack_code(code)}}")]
+      in [_indicator, nil, code, nil]
+        DomElem::ERB[add_to_inner_text("\#{#{transpile_ast(code).content.strip}}")]
       else
-        raise StandardError
+        raise PatternMatchError, "#{node.children} has unexpected patter for ERB"
       end
     end
 
@@ -97,13 +97,13 @@ module WERB
         transpiled = transpile_ast(n)
         current_frame.push!(transpiled)
       end
-      DomElem::Container[collect_result]
+      DomElem::Container[compile_dom_elem]
     end
 
     def tag_to_dom(node)
       tag = BetterHtml::Tree::Tag.from_node(node)
       if tag.closing?
-        DomElem::Container[collect_result]
+        DomElem::Container[compile_dom_elem]
       else
         el_name = generate_el_name
         @frames = append_new_frame(el_name)
@@ -113,6 +113,10 @@ module WERB
 
         DomElem::Creator[el_name, "#{el_name} = #{@document_name}.createElement('#{tag.name}')\n#{attr_str}"]
       end
+    end
+
+    def code_to_dom(node)
+      DomElem::Code["#{node.children[0].strip}\n"]
     end
 
     def extract_attributes(node, el_name)
@@ -136,7 +140,7 @@ module WERB
 
     def current_frame
       frame = @frames.last
-      raise StandardError, 'Frames list is empty' if frame.nil?
+      raise EmptyFrameError if frame.nil?
 
       frame
     end
@@ -144,10 +148,6 @@ module WERB
     def generate_el_name
       @counter += 1
       "#{@el_name_prefix}#{@counter}"
-    end
-
-    def unpack_code(block)
-      block.children[0].strip
     end
 
     def add_to_inner_text(elem)
