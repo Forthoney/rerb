@@ -16,7 +16,7 @@ module WERB
              'nil will use no template and just output raw ruby.wasm code.',
              'Defaults to umd')
         o.on('--document [NAME]',
-             'The name to use for the document element in the compiled code.',
+             'The name to use for the JS document element in the compiled code.',
              'Defaults to "document"')
         o.on('--root [NAME]',
              'The id of the root element in the compiled code.',
@@ -33,8 +33,18 @@ module WERB
       }
       parser.parse!(args, into: opts)
       input_file = args.shift
-      TemplatedGenerator.new(opts[:document], opts[:root], opts[:el_prefix])
-                        .generate_html_page(input_file)
+      case opts[:template]
+      when 'umd'
+        generator_class = UMDGenerator
+      when 'iife'
+        generator_class = IIFEGenerator
+      when 'nil'
+        generator_class = TemplatedGenerator
+      else
+        raise Error
+      end
+      generator_class.new(opts[:document], opts[:root], opts[:el_prefix])
+                     .generate_html_page(input_file)
     end
   end
 end
