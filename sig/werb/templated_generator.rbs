@@ -1,0 +1,19 @@
+module WERB
+  class TemplatedGenerator
+    @doc_name: String
+
+    @root_name: String
+
+    @el_name_prefix: String
+
+    TEMPLATE: String
+
+    def initialize: (String doc_name, String root_name, String el_name_prefix) -> void
+
+    def generate_html_page: (String input) -> String
+  end
+
+  class IIFEGenerator < TemplatedGenerator
+    TEMPLATE: String
+  end
+end

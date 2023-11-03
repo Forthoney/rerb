@@ -1,17 +1,40 @@
 # frozen_string_literal: true
 
-require 'thor'
+require 'optparse'
 
 require 'werb'
-require 'werb/page_generator'
+require 'werb/templated_generator'
 
 module WERB
-  class CLI < Thor
-    desc 'compile FILE', 'Compile ERB file into HTML'
-    option :body_only, type: :boolean, desc: 'Output compiled code without the html boilerplate'
-    def parse(input_file, output_file = nil)
-      output_file ||= "#{input_file}.html"
-      WERB::PageGenerator.generate_html_page(options[:input_file], 'document', 'root', '@el')
+  module CLI
+    def self.parse(args)
+      parser = OptionParser.new do |o|
+        o.banner = 'Usage: werb [options] FILE'
+        o.on('--template [TYPE]', %w[umd iife nil],
+             'Specify which html template to use to wrap the generated code.',
+             'Valid options are umd, iife, and nil.',
+             'nil will use no template and just output raw ruby.wasm code.',
+             'Defaults to umd')
+        o.on('--document [NAME]',
+             'The name to use for the document element in the compiled code.',
+             'Defaults to "document"')
+        o.on('--root [NAME]',
+             'The id of the root element in the compiled code.',
+             'Defaults to "root"')
+        o.on('--el_prefix [PREFIX]',
+             'The prefix to use for the element names in the compiled code.',
+             'Defaults to "el"')
+      end
+      opts = {
+        template: 'umd',
+        document: 'document',
+        root: 'root',
+        el_prefix: 'el'
+      }
+      parser.parse!(args, into: opts)
+      input_file = args.shift
+      TemplatedGenerator.new(opts[:document], opts[:root], opts[:el_prefix])
+                        .generate_html_page(input_file)
     end
   end
 end

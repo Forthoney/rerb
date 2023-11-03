@@ -1,0 +1,5 @@
+module WERB
+  module CLI
+    def self.parse: (untyped args) -> untyped
+  end
+end
