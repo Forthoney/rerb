@@ -9,6 +9,7 @@ require 'werb/dom_elem'
 
 module WERB
   Frame = Data.define(:name, :elems) do
+    # Frame is initialized with an empty array for its elems
     def initialize(name:, elems: [])
       super(name:, elems:)
     end
