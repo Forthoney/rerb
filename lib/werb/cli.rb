@@ -7,7 +7,9 @@ require 'werb/templated_generator'
 
 module WERB
   module CLI
-    def self.parse(args)
+    module_function :parse
+
+    def parse(args)
       parser = OptionParser.new do |o|
         o.banner = 'Usage: werb [options] FILE'
         o.on('--template [TYPE]', %w[umd iife nil],
@@ -35,16 +37,20 @@ module WERB
       input_file = args.shift
       case opts[:template]
       when 'umd'
-        generator_class = UMDGenerator
+        res = UMDGenerator.new(opts[:document], opts[:root], opts[:el_prefix])
+                          .generate_html_page(input_file)
+
       when 'iife'
-        generator_class = IIFEGenerator
+        res = IIFEGenerator.new(opts[:document], opts[:root], opts[:el_prefix])
+                           .generate_html_page(input_file)
+
       when 'nil'
-        generator_class = TemplatedGenerator
+        res = TemplatedGenerator.new(opts[:document], opts[:root], opts[:el_prefix])
+                                .generate_html_page(input_file)
       else
         raise Error
       end
-      generator_class.new(opts[:document], opts[:root], opts[:el_prefix])
-                     .generate_html_page(input_file)
+      p res
     end
   end
 end

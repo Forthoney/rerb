@@ -16,4 +16,8 @@ module WERB
   class IIFEGenerator < TemplatedGenerator
     TEMPLATE: String
   end
+
+  class UMDGenerator < TemplatedGenerator
+    TEMPLATE: untyped
+  end
 end

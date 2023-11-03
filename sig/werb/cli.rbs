@@ -1,5 +1,5 @@
 module WERB
   module CLI
-    def self.parse: (untyped args) -> untyped
+    def parse: (Array[String] args) -> void
   end
 end

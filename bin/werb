@@ -2,4 +2,4 @@
 # frozen_string_literal: true
 
 require 'werb/cli'
-WERB::CLI.parse(ARGV)
+WERB::CLI.parse(ARGV.dup)
