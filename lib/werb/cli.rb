@@ -7,8 +7,6 @@ require 'werb/templated_generator'
 
 module WERB
   module CLI
-    module_function :parse
-
     def parse(args)
       parser = OptionParser.new do |o|
         o.banner = 'Usage: werb [options] FILE'
@@ -52,5 +50,7 @@ module WERB
       end
       p res
     end
+
+    module_function :parse
   end
 end
