@@ -29,7 +29,7 @@ module WERB
     end
 
     def compile
-      compile_ast(@parser.ast).content
+      compile_ast(@parser.ast).content.strip
     end
 
     private

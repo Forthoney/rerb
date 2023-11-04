@@ -18,7 +18,6 @@ module WERB
     def generate_html_page(input)
       content = Compiler.new(input, @doc_name, @root_name, @el_name_prefix)
                         .compile
-                        .chomp
       rhtml = ERB.new(self.class::TEMPLATE)
       rhtml.result(binding)
     end
@@ -37,7 +36,7 @@ module WERB
         <div id="<%= @root_name %>"></div>
       </body>
     </html>
-    ).gsub(/^ /, '')
+    ).gsub(/^    /, '')
   end
 
   class UMDGenerator < TemplatedGenerator
@@ -68,6 +67,6 @@ module WERB
       </script>
       <body></body>
     </html>
-    ).gsub(/^ /, '')
+    ).gsub(/^    /, '')
   end
 end
