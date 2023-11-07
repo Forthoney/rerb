@@ -1,0 +1,13 @@
+# frozen_string_literal: true
+
+module WERB
+  module DomElem
+    ERB = Data.define(:content)
+    Container = Data.define(:content)
+    Code = Data.define(:content)
+    Str = Data.define(:content)
+    Creator = Data.define(:el_name, :content)
+    Attr = Data.define(:content)
+    Ignore = Data.define
+  end
+end

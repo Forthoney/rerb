@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
   spec.description = 'Currently, ruby.wasm requires that you manually write DOM operations to build a DOM. WERB automates the process by transpiling ERB into a series of ruby.wasm compatible DOM operations. Thus, you can write or use whatever ERB you already have and use it with ruby.wasm with minimal effort'
   spec.homepage = 'https://github.com/forthoney/werb'
   spec.license = 'MIT'
-  spec.required_ruby_version = '3.2'
+  spec.required_ruby_version = '~> 3.2'
 
   spec.metadata['allowed_push_host'] = "TODO: Set to your gem server 'https://example.com'"
 

@@ -1,0 +1,17 @@
+module WERB
+  module DomElem
+    ERB: Data
+
+    Container: Data
+
+    Code: Data
+
+    Str: Data
+
+    Creator: Data
+
+    Attr: Data
+
+    Ignore: Data
+  end
+end

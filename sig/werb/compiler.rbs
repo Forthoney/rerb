@@ -1,0 +1,43 @@
+# Classes
+module BetterHtml
+  class Parser
+    def initialize: (untyped buffer) -> void
+    def ast: -> AST::Node
+  end
+
+  module AST
+    class Node
+      attr_reader children: Array[Node | String]
+      attr_reader type: Symbol
+    end
+  end
+end
+
+module WERB
+  Frame: untyped
+
+  class Compiler
+    @counter: Integer
+    @parser: BetterHtml::Parser
+    @document_name: String
+    @el_name_prefix: String
+    @frames: Array[untyped]
+
+    def initialize: (String source, ?String document_name, ?String root_elem_name, ?String el_name_prefix) -> void
+
+    def compile: -> String
+
+    private
+    def create_parser: (String source) -> BetterHtml::Parser
+    def compile_dom_elem: (untyped frame) -> String
+    def compile_ast: (BetterHtml::AST::Node | String node) -> untyped
+    def erb_to_dom: (BetterHtml::AST::Node node) -> untyped
+    def container_to_dom: (BetterHtml::AST::Node node) -> untyped
+    def tag_to_dom: (BetterHtml::AST::Node node) -> untyped
+    def code_to_dom: (BetterHtml::AST::Node node) -> untyped
+    def extract_attributes: (untyped node, String el_name) -> String
+    def current_frame: -> untyped
+    def generate_el_name: -> String
+    def add_to_inner_text: (BetterHtml::AST::Node | String elem) -> String
+  end
+end
