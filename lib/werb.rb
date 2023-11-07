@@ -2,6 +2,8 @@
 
 require_relative 'werb/version'
 require 'werb/compiler'
+require 'werb/templated_generator'
+require 'werb/cli'
 
 module WERB
   class Error < StandardError; end

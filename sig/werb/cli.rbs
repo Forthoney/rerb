@@ -1,0 +1,5 @@
+module WERB
+  module CLI
+    def parse: (Array[String] args) -> void
+  end
+end

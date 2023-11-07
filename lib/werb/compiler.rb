@@ -9,6 +9,7 @@ require 'werb/dom_elem'
 
 module WERB
   Frame = Data.define(:name, :elems) do
+    # Frame is initialized with an empty array for its elems
     def initialize(name:, elems: [])
       super(name:, elems:)
     end
@@ -19,16 +20,16 @@ module WERB
     def initialize(source,
                    document_name = 'document',
                    root_elem_name = 'root',
-                   el_name_prefix = '@el')
+                   el_name_prefix = 'el')
       @counter = 0
       @parser = create_parser(source)
       @document_name = document_name
-      @el_name_prefix = el_name_prefix
+      @el_name_prefix = "@#{el_name_prefix}"
       @frames = [Frame[root_elem_name]]
     end
 
     def compile
-      compile_ast(@parser.ast).content
+      compile_ast(@parser.ast).content.strip
     end
 
     private
