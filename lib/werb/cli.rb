@@ -33,7 +33,7 @@ module WERB
       filename = args.pop
       raise 'Input file name not specified' if filename.nil?
 
-      input = File.read(filename)
+      input = File.read(filename).chomp
 
       case opts[:template]
       when 'umd'
