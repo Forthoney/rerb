@@ -19,11 +19,11 @@ module WERB
   class Compiler
     @counter: Integer
     @parser: BetterHtml::Parser
-    @document_name: String
+    @viewmodel_name: String
     @el_name_prefix: String
     @frames: Array[untyped]
 
-    def initialize: (String source, ?String document_name, ?String root_elem_name, ?String el_name_prefix) -> void
+    def initialize: (String source, String viewmodel_name, ?String root_elem_name, ?String el_name_prefix) -> void
 
     def compile: -> String
 

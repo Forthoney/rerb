@@ -2,8 +2,8 @@
 
 RSpec.describe WERB::Templater do
   it 'generates HTML file using browser.script.iife.js' do
-    res = WERB::IIFETemplater.new('document', 'root', 'el')
-                             .generate_html_page('<h1></h1>')
+    res = WERB::IIFETemplater.new('ViewModel', 'root', 'el')
+                             .generate('<h1></h1>')
     expect(res).to eq(
       <<~EX.chomp
         <html>
@@ -23,8 +23,8 @@ RSpec.describe WERB::Templater do
   end
 
   it 'generates HTML file using browser.umd.js' do
-    res = WERB::UMDTemplater.new('document', 'root', 'el')
-                            .generate_html_page('<h1></h1>')
+    res = WERB::UMDTemplater.new('ViewModel', 'root', 'el')
+                            .generate('<h1></h1>')
     expect(res).to eq(
       <<~EX.chomp
         <html>

@@ -17,13 +17,12 @@ module WERB
 
   # Compile ERB into ruby.wasm compatible code
   class Compiler
-    def initialize(source,
-                   document_name = 'document',
+    def initialize(source, viewmodel_name,
                    root_elem_name = 'root',
                    el_name_prefix = 'el')
       @counter = 0
       @parser = create_parser(source)
-      @document_name = document_name
+      @viewmodel_name = viewmodel_name
       @el_name_prefix = "@#{el_name_prefix}"
       @frames = [Frame[root_elem_name]]
     end
@@ -105,7 +104,7 @@ module WERB
         @frames.push(Frame[el_name])
 
         attributes = container_to_dom(node).content
-        DomElem::Creator[el_name, "#{el_name} = #{@document_name}.createElement('#{tag.name}')\n#{attributes}"]
+        DomElem::Creator[el_name, "#{el_name} = document.createElement('#{tag.name}')\n#{attributes}"]
       end
     end
 

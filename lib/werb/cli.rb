@@ -15,9 +15,6 @@ module WERB
              'Valid options are umd, iife, and nil.',
              'nil will use no template and just output raw ruby.wasm code.',
              'Defaults to umd')
-        o.on('--document [NAME]',
-             'The name to use for the JS document element in the compiled code.',
-             'Defaults to "document"')
         o.on('--root [NAME]',
              'The id of the root element in the compiled code.',
              'Defaults to "root"')
@@ -32,21 +29,24 @@ module WERB
         el_prefix: 'el'
       }
       parser.parse!(args, into: opts)
-      input_file = args.shift
+
+      filename = args.pop
+      raise 'Input file name not specified' if filename.nil?
+
+      input = File.read(filename)
+
       case opts[:template]
       when 'umd'
-        res = UMDTemplater.new(opts[:document], opts[:root], opts[:el_prefix])
-                          .generate(input_file)
-
+        res = UMDTemplater.new(filename, opts[:root], opts[:el_prefix])
+                          .generate(input)
       when 'iife'
-        res = IIFETemplater.new(opts[:document], opts[:root], opts[:el_prefix])
-                           .generate(input_file)
-
+        res = IIFETemplater.new(filename, opts[:root], opts[:el_prefix])
+                           .generate(input)
       when 'nil'
-        res = Templater.new(opts[:document], opts[:root], opts[:el_prefix])
-                       .generate(input_file)
+        res = Templater.new(filename, opts[:root], opts[:el_prefix])
+                       .generate(input)
       else
-        raise Error
+        raise 'Invalid template option. Choose between umd, iife, nil.'
       end
       p res
     end

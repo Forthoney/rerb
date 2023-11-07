@@ -1,6 +1,6 @@
 module WERB
   class Templater
-    @doc_name: String
+    @viewmodel_name: String
 
     @root_name: String
 
@@ -8,7 +8,7 @@ module WERB
 
     TEMPLATE: String
 
-    def initialize: (String doc_name, String root_name, String el_name_prefix) -> void
+    def initialize: (String filename, String root_name, String el_name_prefix) -> void
 
     def generate: (String input) -> String
   end
