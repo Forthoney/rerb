@@ -64,7 +64,9 @@ module WERB
     end
 
     def compile_ast(node)
-      return DomElem::Str[add_to_inner_text(node)] if node.is_a?(String)
+      if node.is_a?(String)
+        return node.strip.empty? ? DomElem::Ignore[] : DomElem::Str[add_to_inner_text(node)]
+      end
 
       case node.type
       when :tag, :erb, :code, :attribute
