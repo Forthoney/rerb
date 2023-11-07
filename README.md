@@ -1,8 +1,8 @@
 # WERB: WebAssembly Embedded Ruby
 
-TODO: Delete this and the text below, and describe your gem
+Use ERB/rhtml to build DOMs in [ruby.wasm](https://github.com/ruby/ruby.wasm).
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/werb`. To experiment with that code, run `bin/console` for an interactive prompt.
+WERB is an unopinionated tool for compiling ERB/rhtml into ruby.wasm DOM operations for building the DOM tree described in the source file. It provides a baseline that developers can extend upon and implement custom behavior like re-rendering, page state, etc.
 
 ## Installation
 
@@ -18,7 +18,11 @@ If bundler is not being used to manage dependencies, install the gem by executin
 
 ## Usage
 
-TODO: Write usage instructions here
+The CLI is the recommended way to use WERB.
+```bash
+werb <input-file>
+```
+This will output into the terminal the
 
 ## Development
 
