@@ -24,6 +24,7 @@ module WERB
       @parser = create_parser(source)
       @viewmodel_name = viewmodel_name
       @el_name_prefix = "@#{el_name_prefix}"
+      @root_elem_name = root_elem_name
       @frames = [Frame[root_elem_name]]
     end
 
@@ -38,6 +39,14 @@ module WERB
 
           def setup_dom
         #{compile_body.gsub(/^/, "  " * 2)}
+          end
+
+          def document
+            JS.global[:document]
+          end
+
+          def root
+            document.getElementById("#{@root_elem_name}")
           end
         end
       RESULT

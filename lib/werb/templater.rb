@@ -29,6 +29,8 @@ module WERB
         <head>
           <script src="https://cdn.jsdelivr.net/npm/ruby-head-wasm-wasi@2.1.0/dist/browser.script.iife.js"></script>
           <script type="text/ruby">
+            require 'js'
+
       <%= content.gsub(/^(?!$)/, '  ' * 3) %>
           </script>
         </head>
@@ -51,7 +53,7 @@ module WERB
               //      Tips: Replace the binary with debug info if you want symbolicated stack trace.
               //      (only nightly release for now)
               //      "https://cdn.jsdelivr.net/npm/ruby-3_2-wasm-wasi@next/dist/ruby.debug+stdlib.wasm"
-              "https://cdn.jsdelivr.net/npm/ruby-3_2-wasm-wasi@latest/dist/ruby.wasm"
+              "https://cdn.jsdelivr.net/npm/ruby-3_2-wasm-wasi@latest/dist/ruby+stdlib.wasm"
             );
             const buffer = await response.arrayBuffer();
             const module = await WebAssembly.compile(buffer);
@@ -59,13 +61,17 @@ module WERB
 
             vm.printVersion();
             vm.eval(`
+              require 'js'
+
       <%= content.gsub(/^(?!$)/, '  ' * 4) %>
             `);
           };
 
           main();
         </script>
-        <body></body>
+        <body>
+          <div id="<%= @root_name %>"></div>
+        </body>
       </html>
     TMPL
   end

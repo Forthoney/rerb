@@ -177,6 +177,14 @@ RSpec.describe WERB::Compiler do
             @el1.setAttribute('id', 'divider')
             root.appendChild(@el1)
           end
+
+          def document
+            JS.global[:document]
+          end
+
+          def root
+            document.getElementById("root")
+          end
         end
       EX
     )

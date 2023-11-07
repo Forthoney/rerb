@@ -21,6 +21,7 @@ module WERB
     @parser: BetterHtml::Parser
     @viewmodel_name: String
     @el_name_prefix: String
+    @root_elem_name: String
     @frames: Array[untyped]
 
     def initialize: (String source, String viewmodel_name, ?String root_elem_name, ?String el_name_prefix) -> void

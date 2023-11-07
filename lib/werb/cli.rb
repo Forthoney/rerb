@@ -48,7 +48,7 @@ module WERB
       else
         raise 'Invalid template option. Choose between umd, iife, nil.'
       end
-      p res
+      puts res
     end
 
     module_function :parse
