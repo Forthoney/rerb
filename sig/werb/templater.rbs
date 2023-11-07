@@ -1,5 +1,5 @@
 module WERB
-  class TemplatedGenerator
+  class Templater
     @doc_name: String
 
     @root_name: String
@@ -10,14 +10,14 @@ module WERB
 
     def initialize: (String doc_name, String root_name, String el_name_prefix) -> void
 
-    def generate_html_page: (String input) -> String
+    def generate: (String input) -> String
   end
 
-  class IIFEGenerator < TemplatedGenerator
+  class IIFETemplater < Templater
     TEMPLATE: String
   end
 
-  class UMDGenerator < TemplatedGenerator
-    TEMPLATE: untyped
+  class UMDTemplater < Templater
+    TEMPLATE: String
   end
 end

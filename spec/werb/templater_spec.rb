@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-RSpec.describe WERB::TemplatedGenerator do
+RSpec.describe WERB::Templater do
   it 'generates HTML file using browser.script.iife.js' do
-    res = WERB::IIFEGenerator.new('document', 'root', 'el')
+    res = WERB::IIFETemplater.new('document', 'root', 'el')
                              .generate_html_page('<h1></h1>')
     expect(res).to eq(
       <<~EX.chomp
@@ -23,7 +23,7 @@ RSpec.describe WERB::TemplatedGenerator do
   end
 
   it 'generates HTML file using browser.umd.js' do
-    res = WERB::UMDGenerator.new('document', 'root', 'el')
+    res = WERB::UMDTemplater.new('document', 'root', 'el')
                             .generate_html_page('<h1></h1>')
     expect(res).to eq(
       <<~EX.chomp

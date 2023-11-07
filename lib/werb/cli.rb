@@ -3,7 +3,7 @@
 require 'optparse'
 
 require 'werb'
-require 'werb/templated_generator'
+require 'werb/templater'
 
 module WERB
   module CLI
@@ -35,16 +35,16 @@ module WERB
       input_file = args.shift
       case opts[:template]
       when 'umd'
-        res = UMDGenerator.new(opts[:document], opts[:root], opts[:el_prefix])
-                          .generate_html_page(input_file)
+        res = UMDTemplater.new(opts[:document], opts[:root], opts[:el_prefix])
+                          .generate(input_file)
 
       when 'iife'
-        res = IIFEGenerator.new(opts[:document], opts[:root], opts[:el_prefix])
-                           .generate_html_page(input_file)
+        res = IIFETemplater.new(opts[:document], opts[:root], opts[:el_prefix])
+                           .generate(input_file)
 
       when 'nil'
-        res = TemplatedGenerator.new(opts[:document], opts[:root], opts[:el_prefix])
-                                .generate_html_page(input_file)
+        res = Templater.new(opts[:document], opts[:root], opts[:el_prefix])
+                       .generate(input_file)
       else
         raise Error
       end
