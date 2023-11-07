@@ -29,7 +29,7 @@ module WERB
         <head>
           <script src="https://cdn.jsdelivr.net/npm/ruby-head-wasm-wasi@2.1.0/dist/browser.script.iife.js"></script>
           <script type="text/ruby">
-      <%= content.gsub(/^/, '  ' * 3) %>
+      <%= content.gsub(/^(?!$)/, '  ' * 3) %>
           </script>
         </head>
         <body>
@@ -59,7 +59,7 @@ module WERB
 
             vm.printVersion();
             vm.eval(`
-      <%= content.gsub(/^/, '  ' * 4) %>
+      <%= content.gsub(/^(?!$)/, '  ' * 4) %>
             `);
           };
 

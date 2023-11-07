@@ -4,7 +4,7 @@ RSpec.describe WERB::Compiler do
   context 'with only pure html elements' do
     it 'compiles single element' do
       compiler = described_class.new('<h1></h1>', 'ViewModel')
-      expect(compiler.compile).to eq(
+      expect(compiler.compile_body).to eq(
         <<~EX.chomp
           @el1 = document.createElement('h1')
           root.appendChild(@el1)
@@ -14,7 +14,7 @@ RSpec.describe WERB::Compiler do
 
     it 'compiles single element with text' do
       compiler = described_class.new('<h1>Hello World</h1>', 'ViewModel')
-      expect(compiler.compile).to eq(
+      expect(compiler.compile_body).to eq(
         <<~EX.chomp
           @el1 = document.createElement('h1')
           root.appendChild(@el1)
@@ -25,7 +25,7 @@ RSpec.describe WERB::Compiler do
 
     it 'compiles sibling elements' do
       compiler = described_class.new('<h1></h1><h2></h2>', 'ViewModel')
-      expect(compiler.compile).to eq(
+      expect(compiler.compile_body).to eq(
         <<~EX.chomp
           @el1 = document.createElement('h1')
           root.appendChild(@el1)
@@ -37,7 +37,7 @@ RSpec.describe WERB::Compiler do
 
     it 'compiles sibling elements with text' do
       compiler = described_class.new('<h1>Hello</h1><h2>World</h2>', 'ViewModel')
-      expect(compiler.compile).to eq(
+      expect(compiler.compile_body).to eq(
         <<~EX.chomp
           @el1 = document.createElement('h1')
           root.appendChild(@el1)
@@ -51,7 +51,7 @@ RSpec.describe WERB::Compiler do
 
     it 'compiles nested elements' do
       compiler = described_class.new('<h1><h2></h2></h1>', 'ViewModel')
-      expect(compiler.compile).to eq(
+      expect(compiler.compile_body).to eq(
         <<~EX.chomp
           @el1 = document.createElement('h1')
           root.appendChild(@el1)
@@ -63,7 +63,7 @@ RSpec.describe WERB::Compiler do
 
     it 'compiles nested elements with text in child' do
       compiler = described_class.new('<h1><h2>Hello World</h2></h1>', 'ViewModel')
-      expect(compiler.compile).to eq(
+      expect(compiler.compile_body).to eq(
         <<~EX.chomp
           @el1 = document.createElement('h1')
           root.appendChild(@el1)
@@ -76,7 +76,7 @@ RSpec.describe WERB::Compiler do
 
     it 'compiles nested elements with text in child and parent' do
       compiler = described_class.new('<h1>Hiyo<h2>Hello World</h2></h1>', 'ViewModel')
-      expect(compiler.compile).to eq(
+      expect(compiler.compile_body).to eq(
         <<~EX.chomp
           @el1 = document.createElement('h1')
           root.appendChild(@el1)
@@ -92,7 +92,7 @@ RSpec.describe WERB::Compiler do
   context 'with ERB embeddings' do
     it 'compiles erb expression' do
       compiler = described_class.new('<%= foo %>', 'ViewModel')
-      expect(compiler.compile).to eq(
+      expect(compiler.compile_body).to eq(
         <<~EX.chomp
           root[:innerText] = root[:innerText].to_s + "\#{foo}"
         EX
@@ -101,7 +101,7 @@ RSpec.describe WERB::Compiler do
 
     it 'compiles nested erb expression' do
       compiler = described_class.new('<h1><%= foo %></h1>', 'ViewModel')
-      expect(compiler.compile).to eq(
+      expect(compiler.compile_body).to eq(
         <<~EX.chomp
           @el1 = document.createElement('h1')
           root.appendChild(@el1)
@@ -112,7 +112,7 @@ RSpec.describe WERB::Compiler do
 
     it 'compiles erb statement' do
       compiler = described_class.new('<% if true %>Hello World<% end %>', 'ViewModel')
-      expect(compiler.compile).to eq(
+      expect(compiler.compile_body).to eq(
         <<~EX.chomp
           if true
           root[:innerText] = root[:innerText].to_s + "Hello World"
@@ -125,7 +125,7 @@ RSpec.describe WERB::Compiler do
   context 'with html elements containing an attribute' do
     it 'compiles name-value attributes' do
       compiler = described_class.new('<div class="container"></div>', 'ViewModel')
-      expect(compiler.compile).to eq(
+      expect(compiler.compile_body).to eq(
         <<~EX.chomp
           @el1 = document.createElement('div')
           @el1.setAttribute('class', 'container')
@@ -136,7 +136,7 @@ RSpec.describe WERB::Compiler do
 
     it 'compiles event attributes' do
       compiler = described_class.new('<div onclick=<%= lambda { |e| p e } %>></div>', 'ViewModel')
-      expect(compiler.compile).to eq(
+      expect(compiler.compile_body).to eq(
         <<~EX.chomp
           @el1 = document.createElement('div')
           @el1.addEventListener('click', lambda { |e| p e })
@@ -149,7 +149,7 @@ RSpec.describe WERB::Compiler do
   context 'with html elements containing multiple attributes' do
     it 'compiles name-value attributes' do
       compiler = described_class.new('<div class="container" id="divider"></div>', 'ViewModel')
-      expect(compiler.compile).to eq(
+      expect(compiler.compile_body).to eq(
         <<~EX.chomp
           @el1 = document.createElement('div')
           @el1.setAttribute('class', 'container')
@@ -158,5 +158,27 @@ RSpec.describe WERB::Compiler do
         EX
       )
     end
+  end
+
+  it 'compiles full classes' do
+    compiler = described_class.new('<div class="container" id="divider"></div>', 'ViewModel')
+    expect(compiler.compile).to eq(
+      <<~EX.chomp
+        class ViewModel
+          def initialize
+            setup_dom
+          end
+
+          private
+
+          def setup_dom
+            @el1 = document.createElement('div')
+            @el1.setAttribute('class', 'container')
+            @el1.setAttribute('id', 'divider')
+            root.appendChild(@el1)
+          end
+        end
+      EX
+    )
   end
 end

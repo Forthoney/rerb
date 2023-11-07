@@ -28,6 +28,22 @@ module WERB
     end
 
     def compile
+      <<~RESULT.chomp
+        class #{@viewmodel_name}
+          def initialize
+            setup_dom
+          end
+
+          private
+
+          def setup_dom
+        #{compile_body.gsub(/^/, "  " * 2)}
+          end
+        end
+      RESULT
+    end
+
+    def compile_body
       compile_ast(@parser.ast).content.strip
     end
 

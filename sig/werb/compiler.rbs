@@ -27,6 +27,8 @@ module WERB
 
     def compile: -> String
 
+    def compile_body: -> String
+
     private
     def create_parser: (String source) -> BetterHtml::Parser
     def compile_dom_elem: (untyped frame) -> String

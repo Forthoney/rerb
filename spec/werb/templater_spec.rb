@@ -2,7 +2,7 @@
 
 RSpec.describe WERB::Templater do
   it 'generates HTML file using browser.script.iife.js' do
-    res = WERB::IIFETemplater.new('ViewModel', 'root', 'el')
+    res = WERB::IIFETemplater.new('view_model.erb', 'root', 'el')
                              .generate('<h1></h1>')
     expect(res).to eq(
       <<~EX.chomp
@@ -10,8 +10,18 @@ RSpec.describe WERB::Templater do
           <head>
             <script src="https://cdn.jsdelivr.net/npm/ruby-head-wasm-wasi@2.1.0/dist/browser.script.iife.js"></script>
             <script type="text/ruby">
-              @el1 = document.createElement('h1')
-              root.appendChild(@el1)
+              class ViewModel
+                def initialize
+                  setup_dom
+                end
+
+                private
+
+                def setup_dom
+                  @el1 = document.createElement('h1')
+                  root.appendChild(@el1)
+                end
+              end
             </script>
           </head>
           <body>
@@ -23,7 +33,7 @@ RSpec.describe WERB::Templater do
   end
 
   it 'generates HTML file using browser.umd.js' do
-    res = WERB::UMDTemplater.new('ViewModel', 'root', 'el')
+    res = WERB::UMDTemplater.new('view_model.erb', 'root', 'el')
                             .generate('<h1></h1>')
     expect(res).to eq(
       <<~EX.chomp
@@ -45,8 +55,18 @@ RSpec.describe WERB::Templater do
 
               vm.printVersion();
               vm.eval(`
-                @el1 = document.createElement('h1')
-                root.appendChild(@el1)
+                class ViewModel
+                  def initialize
+                    setup_dom
+                  end
+
+                  private
+
+                  def setup_dom
+                    @el1 = document.createElement('h1')
+                    root.appendChild(@el1)
+                  end
+                end
               `);
             };
 
