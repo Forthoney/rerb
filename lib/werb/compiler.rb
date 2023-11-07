@@ -8,15 +8,37 @@ require 'werb'
 require 'werb/dom_elem'
 
 module WERB
-  Frame = Data.define(:name, :elems) do
-    # Frame is initialized with an empty array for its elems
-    def initialize(name:, elems: [])
-      super(name:, elems:)
+  class Compiler
+    def initialize(source,
+                   document_name = 'document',
+                   root_elem_name = 'root',
+                   el_name_prefix = 'el',
+                   viewmodel_name = 'viewmodel')
+      @render_compiler = RenderCompiler.new(source, document_name, root_elem_name, el_name_prefix)
+      @viewmodel_name = viewmodel_name
+    end
+
+    def compile
+      <<~RESULT
+        class #{@viewmodel_name}
+          def initialize
+            #{@render_compiler.compile}
+          end
+        end
+        #{@viewmodel_name}.new
+      RESULT
     end
   end
 
-  # Compile ERB into ruby.wasm compatible code
-  class Compiler
+  # Compiles ERB into code that will render the ERB in ruby.wasm
+  class RenderCompiler
+    Frame = Data.define(:name, :elems) do
+      # Frame is initialized with an empty array for its elems
+      def initialize(name:, elems: [])
+        super(name:, elems:)
+      end
+    end
+
     def initialize(source,
                    document_name = 'document',
                    root_elem_name = 'root',

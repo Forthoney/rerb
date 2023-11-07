@@ -14,14 +14,26 @@ module BetterHtml
 end
 
 module WERB
-  Frame: untyped
-
   class Compiler
+    @render_compiler: RenderCompiler
+    @viewmodel_name: String
+
+    def initialize: (String source,
+                     ?String document_name,
+                     ?String root_elem_name,
+                     ?String el_name_prefix,
+                     ?String viewmodel_name) -> void
+    def compile: -> String
+  end
+
+  class RenderCompiler
     @counter: Integer
     @parser: BetterHtml::Parser
     @document_name: String
     @el_name_prefix: String
     @frames: Array[untyped]
+
+    Frame = untyped
 
     def initialize: (String source, ?String document_name, ?String root_elem_name, ?String el_name_prefix) -> void
 
