@@ -17,7 +17,8 @@ module WERB
     end
 
     DOMContent = Data.define(:content)
-    DOMRuby = Data.define(:content)
+    DOMRubyExpr = Data.define(:content)
+    DOMRubyStatement = Data.define(:content)
     DOMCreate = Data.define(:el_name, :content)
     DOMIgnore = Data.define
 
@@ -57,7 +58,7 @@ module WERB
     end
 
     def compile_body
-      compile_dom_elem(compile_ast(@parser.ast)).strip
+      dom_to_str(compile_ast(@parser.ast)).strip
     end
 
     private
@@ -76,31 +77,28 @@ module WERB
         DOMContent[node]
 
       in [:erb, nil, start_trim, code, end_trim] # ERB statement
-        @frames.push(Frame[current_frame.name])
-        compiled = compile_ast(code)
-        current_frame.elems.push(compiled)
-        DOMContent[collect_frame(@frames.pop)]
+        DOMRubyStatement[dom_to_str(compile_ast(code)).strip.to_s]
 
       in [:erb, _ind, start_trim, code, end_trim] # ERB expression
-        DOMRuby[compile_dom_elem(compile_ast(code)).strip.to_s]
+        DOMRubyExpr[dom_to_str(compile_ast(code)).strip.to_s]
 
       in [:tag, nil, tag_name, tag_attr, _solidus] # Opening tag
         el_name = generate_el_name
         @frames.push(Frame[el_name])
-        name = compile_dom_elem(compile_ast(tag_name))
-        attrs = compile_dom_elem(compile_ast(tag_attr))
+        name = dom_to_str(compile_ast(tag_name))
+        attrs = dom_to_str(compile_ast(tag_attr))
         DOMCreate[el_name, "#{el_name} = document.createElement('#{name}')\n#{attrs}"]
 
       in [:tag, _start_solidus, _tag_name, _tag_attr, _solidus] # Closing tag
         DOMContent[collect_frame(@frames.pop)]
 
       in [:attribute, attr_name, _eql_token, attr_value] # Attribute
-        name = compile_dom_elem(compile_ast(attr_name))
+        name = dom_to_str(compile_ast(attr_name))
         if name[0...2] == 'on'
-          value = compile_dom_elem(compile_ast(attr_value), interpolate: false)
+          value = dom_to_str(compile_ast(attr_value), interpolate: false)
           DOMContent[%(#{current_frame.name}.addEventListener("#{name[2...]}", #{value})\n)]
         else
-          value = compile_dom_elem(compile_ast(attr_value), interpolate: true)
+          value = dom_to_str(compile_ast(attr_value), interpolate: true)
           DOMContent[%(#{current_frame.name}.setAttribute("#{name}", "#{value}")\n)]
         end
 
@@ -108,28 +106,44 @@ module WERB
         DOMContent["#{code.strip}\n"]
 
       in [:text, *children]
-        f_name = current_frame.name
-        DOMContent[
-          %(#{f_name}[:innerText] = #{f_name}[:innerText].to_s + "#{collect_children(children, interpolate: true)}"\n)
-        ]
+        DOMContent[join_text_children(children)]
 
       in [:document, *] |
          [:attribute_value, *] |
          [:tag_attributes, *]
         DOMContent[collect_children(node.children, interpolate: false)]
 
-      in [:attribute_name, *] | [:tag_name, *]
+      in [:attribute_name, *] |
+         [:tag_name, *]
         DOMContent[collect_children(node.children, interpolate: true)]
       end
     end
 
-    def compile_dom_elem(elem, interpolate: false)
+    def join_text_children(children)
+      f_name = current_frame.name
+      children.compact.map do |c|
+        case compile_ast(c)
+        in DOMRubyStatement(content)
+          "#{content}\n"
+        in DOMIgnore
+          ''
+        in DOMContent(content)
+          %(#{f_name}[:innerText] = #{f_name}[:innerText].to_s + "#{content}"\n)
+        in DOMRubyExpr(content)
+          %(#{f_name}[:innerText] = #{f_name}[:innerText].to_s + "\#{#{content}}"\n)
+        end
+      end.join
+    end
+
+    def dom_to_str(elem, interpolate: false)
       case elem
       in DOMCreate(el_name, content)
         content.to_s + "#{current_frame.name}.appendChild(#{el_name})\n"
       in DOMContent(content)
         content.to_s
-      in DOMRuby(content)
+      in DOMRubyStatement(content)
+        content.to_s
+      in DOMRubyExpr(content)
         interpolate ? "\#{#{content}}" : content.to_s
       in DOMIgnore
         ''
@@ -137,7 +151,7 @@ module WERB
     end
 
     def collect_frame(frame, interpolate: false)
-      frame.elems.reduce('') { |acc, el| acc + compile_dom_elem(el, interpolate:) }
+      frame.elems.map { |e| dom_to_str(e, interpolate:) }.join
     end
 
     def collect_children(children, interpolate: false)
