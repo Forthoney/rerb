@@ -54,6 +54,8 @@ module WERB
             document.getElementById("#{@root_elem_name}")
           end
         end
+
+        #{@viewmodel_name}.new
       RESULT
     end
 
@@ -74,7 +76,7 @@ module WERB
         DOMIgnore[]
 
       in String
-        DOMContent[node]
+        node.strip.empty? ? DOMIgnore[] : DOMContent[node.strip]
 
       in [:erb, nil, start_trim, code, end_trim] # ERB statement
         DOMRubyStatement[dom_to_str(compile_ast(code)).strip.to_s]
