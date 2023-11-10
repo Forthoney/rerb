@@ -128,7 +128,7 @@ RSpec.describe WERB::Compiler do
       expect(compiler.compile_body).to eq(
         <<~EX.chomp
           @el1 = document.createElement('div')
-          @el1.setAttribute('class', 'container')
+          @el1.setAttribute("class", "container")
           root.appendChild(@el1)
         EX
       )
@@ -139,7 +139,18 @@ RSpec.describe WERB::Compiler do
       expect(compiler.compile_body).to eq(
         <<~EX.chomp
           @el1 = document.createElement('div')
-          @el1.addEventListener('click', lambda { |e| p e })
+          @el1.addEventListener("click", lambda { |e| p e })
+          root.appendChild(@el1)
+        EX
+      )
+    end
+
+    it 'compiles attributes with interpolation' do
+      compiler = described_class.new('<div data-<%= value %>="bool"></div>', 'ViewModel')
+      expect(compiler.compile_body).to eq(
+        <<~EX.chomp
+          @el1 = document.createElement('div')
+          @el1.setAttribute("data-\#{value}", "bool")
           root.appendChild(@el1)
         EX
       )
@@ -152,8 +163,8 @@ RSpec.describe WERB::Compiler do
       expect(compiler.compile_body).to eq(
         <<~EX.chomp
           @el1 = document.createElement('div')
-          @el1.setAttribute('class', 'container')
-          @el1.setAttribute('id', 'divider')
+          @el1.setAttribute("class", "container")
+          @el1.setAttribute("id", "divider")
           root.appendChild(@el1)
         EX
       )
@@ -173,8 +184,8 @@ RSpec.describe WERB::Compiler do
 
           def setup_dom
             @el1 = document.createElement('div')
-            @el1.setAttribute('class', 'container')
-            @el1.setAttribute('id', 'divider')
+            @el1.setAttribute("class", "container")
+            @el1.setAttribute("id", "divider")
             root.appendChild(@el1)
           end
 
