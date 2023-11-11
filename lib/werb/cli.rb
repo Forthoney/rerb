@@ -9,18 +9,19 @@ module WERB
   module CLI
     def parse(args)
       parser = OptionParser.new do |o|
-        o.banner = 'Usage: werb [options] FILE'
+        o.banner = 'Usage: werb [options...] FILE'
         o.on('--template [TYPE]', %w[umd iife nil],
-             'Specify which html template to use to wrap the generated code.',
+             'Specify which html template to use to wrap the generated code. ',
              'Valid options are umd, iife, and nil.',
-             'nil will use no template and just output raw ruby.wasm code.',
+             'nil will use no template and just output raw ruby.wasm code. ',
              'Defaults to umd')
         o.on('--root [NAME]',
-             'The id of the root element in the compiled code.',
+             'The html id of the root element to add all other DOM nodes to. ',
              'Defaults to "root"')
         o.on('--el_prefix [PREFIX]',
-             'The prefix to use for the element names in the compiled code.',
+             'The prefix to use for the element names in the compiled code. ',
              'Defaults to "el"')
+        o.on('-v', '--version', 'Output version information and exit.')
       end
       opts = {
         template: 'umd',
@@ -30,11 +31,10 @@ module WERB
       }
       parser.parse!(args, into: opts)
 
-      filename = args.pop
-      raise 'Input file name not specified' if filename.nil?
+      filename = args.shift
+      return puts opts.help if filename.nil?
 
       input = File.read(filename)
-
       case opts[:template]
       when 'umd'
         res = UMDTemplater.new(filename, opts[:root], opts[:el_prefix])
