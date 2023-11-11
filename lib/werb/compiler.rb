@@ -5,6 +5,7 @@ require 'better_html/parser'
 require 'better_html/tree/tag'
 
 require 'werb'
+require 'werb/ir'
 
 module WERB
   # Compile ERB into ruby.wasm compatible code
@@ -15,12 +16,6 @@ module WERB
         super(name:, elems:)
       end
     end
-
-    DOMContent = Data.define(:content)
-    DOMRubyExpr = Data.define(:content)
-    DOMRubyStatement = Data.define(:content)
-    DOMCreate = Data.define(:el_name, :content)
-    DOMIgnore = Data.define
 
     def initialize(source, viewmodel_name,
                    root_elem_name = 'root',
@@ -73,51 +68,51 @@ module WERB
     def compile_ast(node)
       case node
       in nil | [:quote, *]
-        DOMIgnore[]
+        IR::Ignore[]
 
       in String
-        node.strip.empty? ? DOMIgnore[] : DOMContent[node.strip]
+        node.strip.empty? ? IR::Ignore[] : IR::Content[node.strip]
 
       in [:erb, nil, start_trim, code, end_trim] # ERB statement
-        DOMRubyStatement[dom_to_str(compile_ast(code)).strip.to_s]
+        IR::RubyStatement[dom_to_str(compile_ast(code)).strip.to_s]
 
       in [:erb, _ind, start_trim, code, end_trim] # ERB expression
-        DOMRubyExpr[dom_to_str(compile_ast(code)).strip.to_s]
+        IR::RubyExpr[dom_to_str(compile_ast(code)).strip.to_s]
 
       in [:tag, nil, tag_name, tag_attr, _solidus] # Opening tag
         el_name = generate_el_name
         @frames.push(Frame[el_name])
         name = dom_to_str(compile_ast(tag_name))
         attrs = dom_to_str(compile_ast(tag_attr))
-        DOMCreate[el_name, "#{el_name} = document.createElement('#{name}')\n#{attrs}"]
+        IR::Create[el_name, "#{el_name} = document.createElement('#{name}')\n#{attrs}"]
 
       in [:tag, _start_solidus, _tag_name, _tag_attr, _solidus] # Closing tag
-        DOMContent[collect_frame(@frames.pop)]
+        IR::Content[collect_frame(@frames.pop)]
 
       in [:attribute, attr_name, _eql_token, attr_value] # Attribute
         name = dom_to_str(compile_ast(attr_name))
         if name[0...2] == 'on'
           value = dom_to_str(compile_ast(attr_value), interpolate: false)
-          DOMContent[%(#{current_frame.name}.addEventListener("#{name[2...]}", #{value})\n)]
+          IR::Content[%(#{current_frame.name}.addEventListener("#{name[2...]}", #{value})\n)]
         else
           value = dom_to_str(compile_ast(attr_value), interpolate: true)
-          DOMContent[%(#{current_frame.name}.setAttribute("#{name}", "#{value}")\n)]
+          IR::Content[%(#{current_frame.name}.setAttribute("#{name}", "#{value}")\n)]
         end
 
       in [:code, code]
-        DOMContent["#{code.strip}\n"]
+        IR::Content["#{code.strip}\n"]
 
       in [:text, *children]
-        DOMContent[join_text_children(children)]
+        IR::Content[join_text_children(children)]
 
       in [:document, *] |
          [:attribute_value, *] |
          [:tag_attributes, *]
-        DOMContent[collect_children(node.children, interpolate: false)]
+        IR::Content[collect_children(node.children, interpolate: false)]
 
       in [:attribute_name, *] |
          [:tag_name, *]
-        DOMContent[collect_children(node.children, interpolate: true)]
+        IR::Content[collect_children(node.children, interpolate: true)]
       end
     end
 
@@ -125,13 +120,13 @@ module WERB
       f_name = current_frame.name
       children.compact.map do |c|
         case compile_ast(c)
-        in DOMRubyStatement(content)
+        in IR::RubyStatement(content)
           "#{content}\n"
-        in DOMIgnore
+        in IR::Ignore
           ''
-        in DOMContent(content)
+        in IR::Content(content)
           %(#{f_name}[:innerText] = #{f_name}[:innerText].to_s + "#{content}"\n)
-        in DOMRubyExpr(content)
+        in IR::RubyExpr(content)
           %(#{f_name}[:innerText] = #{f_name}[:innerText].to_s + "\#{#{content}}"\n)
         end
       end.join
@@ -139,15 +134,15 @@ module WERB
 
     def dom_to_str(elem, interpolate: false)
       case elem
-      in DOMCreate(el_name, content)
+      in IR::Create(el_name, content)
         content.to_s + "#{current_frame.name}.appendChild(#{el_name})\n"
-      in DOMContent(content)
+      in IR::Content(content)
         content.to_s
-      in DOMRubyStatement(content)
+      in IR::RubyStatement(content)
         content.to_s
-      in DOMRubyExpr(content)
+      in IR::RubyExpr(content)
         interpolate ? "\#{#{content}}" : content.to_s
-      in DOMIgnore
+      in IR::Ignore
         ''
       end
     end

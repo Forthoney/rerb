@@ -32,6 +32,8 @@ RSpec.describe WERB::Templater do
                   document.getElementById("root")
                 end
               end
+
+              ViewModel.new
             </script>
           </head>
           <body>
@@ -88,6 +90,8 @@ RSpec.describe WERB::Templater do
                     document.getElementById("root")
                   end
                 end
+
+                ViewModel.new
               `);
             };
 

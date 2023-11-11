@@ -14,33 +14,52 @@ module BetterHtml
 end
 
 module WERB
-  Frame: untyped
-
+  # Compile ERB into ruby.wasm compatible code
   class Compiler
+    class Frame < Data
+      attr_reader name: String
+      attr_reader elems: Array[IR::node]
+
+      def initialize: (String, ?Array[IR::node]) -> void
+    end
+
     @counter: Integer
+
     @parser: BetterHtml::Parser
+
     @viewmodel_name: String
+
     @el_name_prefix: String
+
     @root_elem_name: String
-    @frames: Array[untyped]
 
-    def initialize: (String source, String viewmodel_name, ?String root_elem_name, ?String el_name_prefix) -> void
+    @frames: Array[Frame]
 
-    def compile: -> String
+    def initialize: (String source,
+                     String viewmodel_name,
+                     ?String root_elem_name,
+                     ?String el_name_prefix) -> void
 
-    def compile_body: -> String
+    def compile: () -> String
+
+    def compile_body: () -> String
 
     private
+
     def create_parser: (String source) -> BetterHtml::Parser
-    def compile_dom_elem: (untyped frame) -> String
-    def compile_ast: (BetterHtml::AST::Node | String node) -> untyped
-    def erb_to_dom: (BetterHtml::AST::Node node) -> untyped
-    def container_to_dom: (BetterHtml::AST::Node node) -> untyped
-    def tag_to_dom: (BetterHtml::AST::Node node) -> untyped
-    def code_to_dom: (BetterHtml::AST::Node node) -> untyped
-    def extract_attributes: (untyped node, String el_name) -> String
-    def current_frame: -> untyped
-    def generate_el_name: -> String
-    def add_to_inner_text: (BetterHtml::AST::Node | String elem) -> String
+
+    def compile_ast: (BetterHtml::AST::Node | String node) -> IR::node
+
+    def join_text_children: (Array[IR::node | nil] children) -> String
+
+    def dom_to_str: (IR::node elem, ?interpolate: bool) -> String
+
+    def collect_frame: (Frame frame, ?interpolate: bool) -> untyped
+
+    def collect_children: (Array[BetterHtml::AST::Node] children, ?interpolate: bool) -> untyped
+
+    def current_frame: () -> Frame
+
+    def generate_el_name: () -> String
   end
 end

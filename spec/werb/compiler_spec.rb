@@ -197,6 +197,8 @@ RSpec.describe WERB::Compiler do
             document.getElementById("root")
           end
         end
+
+        ViewModel.new
       EX
     )
   end

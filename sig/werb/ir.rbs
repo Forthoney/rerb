@@ -1,0 +1,12 @@
+module WERB
+  # Intermediate Representation Nodes
+  module IR
+    class Content < Data end
+    class RubyExpr < Data end
+    class RubyStatement < Data end
+    class Create < Data end
+    class Ignore < Data end
+
+    type node = Content | RubyExpr | RubyStatement | Create | Ignore
+  end
+end

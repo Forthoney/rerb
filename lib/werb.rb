@@ -4,11 +4,10 @@ require_relative 'werb/version'
 require 'werb/compiler'
 require 'werb/templater'
 require 'werb/cli'
+require 'werb/ir'
 
 module WERB
   class Error < StandardError; end
-
-  class PatternMatchError < Error; end
 
   class EmptyFrameError < Error
     def initialize(message = 'Frames list is empty')
