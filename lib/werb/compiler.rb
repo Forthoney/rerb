@@ -17,13 +17,11 @@ module WERB
       end
     end
 
-    def initialize(source, viewmodel_name,
-                   root_elem_name = 'root',
-                   el_name_prefix = 'el')
+    def initialize(source, viewmodel_name, root_elem_name = 'root')
       @counter = 0
       @parser = create_parser(source)
       @viewmodel_name = viewmodel_name
-      @el_name_prefix = "@#{el_name_prefix}"
+      @name_hash = Hash.new { |h, k| h[k] = 0 }
       @root_elem_name = root_elem_name
       @frames = [Frame[root_elem_name]]
     end
@@ -65,6 +63,8 @@ module WERB
       BetterHtml::Parser.new(buffer)
     end
 
+    # Unfortunately, this very ugly pattern matching is the only way to
+    # pattern match the AST::Nodes from better-html
     def compile_ast(node)
       case node
       in nil | [:quote, *]
@@ -80,11 +80,11 @@ module WERB
         IR::RubyExpr[dom_to_str(compile_ast(code)).strip.to_s]
 
       in [:tag, nil, tag_name, tag_attr, _solidus] # Opening tag
-        el_name = generate_el_name
+        tag_type = dom_to_str(compile_ast(tag_name))
+        el_name = generate_el_name(tag_type)
         @frames.push(Frame[el_name])
-        name = dom_to_str(compile_ast(tag_name))
         attrs = dom_to_str(compile_ast(tag_attr))
-        IR::Create[el_name, "#{el_name} = document.createElement('#{name}')\n#{attrs}"]
+        IR::Create[el_name, "#{el_name} = document.createElement('#{tag_type}')\n#{attrs}"]
 
       in [:tag, _start_solidus, _tag_name, _tag_attr, _solidus] # Closing tag
         IR::Content[collect_frame(@frames.pop)]
@@ -168,9 +168,9 @@ module WERB
       @frames.last or raise EmptyFrameError
     end
 
-    def generate_el_name
-      @counter += 1
-      "#{@el_name_prefix}#{@counter}"
+    def generate_el_name(tag_type)
+      @name_hash[tag_type] += 1
+      "@#{tag_type}_#{@name_hash[tag_type]}"
     end
   end
 end

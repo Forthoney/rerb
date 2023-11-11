@@ -2,7 +2,7 @@
 
 RSpec.describe WERB::Templater do
   it 'generates HTML file using browser.script.iife.js' do
-    res = WERB::IIFETemplater.new('view_model.erb', 'root', 'el')
+    res = WERB::IIFETemplater.new('view_model.erb', 'root')
                              .generate('<h1></h1>')
     expect(res).to eq(
       <<~EX.chomp
@@ -20,8 +20,8 @@ RSpec.describe WERB::Templater do
                 private
 
                 def setup_dom
-                  @el1 = document.createElement('h1')
-                  root.appendChild(@el1)
+                  @h1_1 = document.createElement('h1')
+                  root.appendChild(@h1_1)
                 end
 
                 def document
@@ -45,7 +45,7 @@ RSpec.describe WERB::Templater do
   end
 
   it 'generates HTML file using browser.umd.js' do
-    res = WERB::UMDTemplater.new('view_model.erb', 'root', 'el')
+    res = WERB::UMDTemplater.new('view_model.erb', 'root')
                             .generate('<h1>Hello World</h1>')
     expect(res).to eq(
       <<~EX.chomp
@@ -77,9 +77,9 @@ RSpec.describe WERB::Templater do
                   private
 
                   def setup_dom
-                    @el1 = document.createElement('h1')
-                    root.appendChild(@el1)
-                    @el1[:innerText] = @el1[:innerText].to_s + "Hello World"
+                    @h1_1 = document.createElement('h1')
+                    root.appendChild(@h1_1)
+                    @h1_1[:innerText] = @h1_1[:innerText].to_s + "Hello World"
                   end
 
                   def document

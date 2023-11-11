@@ -29,7 +29,7 @@ module WERB
 
     @viewmodel_name: String
 
-    @el_name_prefix: String
+    @name_hash: Hash[String, Integer]
 
     @root_elem_name: String
 
@@ -37,8 +37,7 @@ module WERB
 
     def initialize: (String source,
                      String viewmodel_name,
-                     ?String root_elem_name,
-                     ?String el_name_prefix) -> void
+                     ?String root_elem_name) -> void
 
     def compile: () -> String
 

@@ -6,8 +6,8 @@ RSpec.describe WERB::Compiler do
       compiler = described_class.new('<h1></h1>', 'ViewModel')
       expect(compiler.compile_body).to eq(
         <<~EX.chomp
-          @el1 = document.createElement('h1')
-          root.appendChild(@el1)
+          @h1_1 = document.createElement('h1')
+          root.appendChild(@h1_1)
         EX
       )
     end
@@ -16,9 +16,9 @@ RSpec.describe WERB::Compiler do
       compiler = described_class.new('<h1>Hello World</h1>', 'ViewModel')
       expect(compiler.compile_body).to eq(
         <<~EX.chomp
-          @el1 = document.createElement('h1')
-          root.appendChild(@el1)
-          @el1[:innerText] = @el1[:innerText].to_s + "Hello World"
+          @h1_1 = document.createElement('h1')
+          root.appendChild(@h1_1)
+          @h1_1[:innerText] = @h1_1[:innerText].to_s + "Hello World"
         EX
       )
     end
@@ -27,10 +27,10 @@ RSpec.describe WERB::Compiler do
       compiler = described_class.new('<h1></h1><h2></h2>', 'ViewModel')
       expect(compiler.compile_body).to eq(
         <<~EX.chomp
-          @el1 = document.createElement('h1')
-          root.appendChild(@el1)
-          @el2 = document.createElement('h2')
-          root.appendChild(@el2)
+          @h1_1 = document.createElement('h1')
+          root.appendChild(@h1_1)
+          @h2_1 = document.createElement('h2')
+          root.appendChild(@h2_1)
         EX
       )
     end
@@ -39,12 +39,12 @@ RSpec.describe WERB::Compiler do
       compiler = described_class.new('<h1>Hello</h1><h2>World</h2>', 'ViewModel')
       expect(compiler.compile_body).to eq(
         <<~EX.chomp
-          @el1 = document.createElement('h1')
-          root.appendChild(@el1)
-          @el1[:innerText] = @el1[:innerText].to_s + "Hello"
-          @el2 = document.createElement('h2')
-          root.appendChild(@el2)
-          @el2[:innerText] = @el2[:innerText].to_s + "World"
+          @h1_1 = document.createElement('h1')
+          root.appendChild(@h1_1)
+          @h1_1[:innerText] = @h1_1[:innerText].to_s + "Hello"
+          @h2_1 = document.createElement('h2')
+          root.appendChild(@h2_1)
+          @h2_1[:innerText] = @h2_1[:innerText].to_s + "World"
         EX
       )
     end
@@ -53,10 +53,10 @@ RSpec.describe WERB::Compiler do
       compiler = described_class.new('<h1><h2></h2></h1>', 'ViewModel')
       expect(compiler.compile_body).to eq(
         <<~EX.chomp
-          @el1 = document.createElement('h1')
-          root.appendChild(@el1)
-          @el2 = document.createElement('h2')
-          @el1.appendChild(@el2)
+          @h1_1 = document.createElement('h1')
+          root.appendChild(@h1_1)
+          @h2_1 = document.createElement('h2')
+          @h1_1.appendChild(@h2_1)
         EX
       )
     end
@@ -65,11 +65,11 @@ RSpec.describe WERB::Compiler do
       compiler = described_class.new('<h1><h2>Hello World</h2></h1>', 'ViewModel')
       expect(compiler.compile_body).to eq(
         <<~EX.chomp
-          @el1 = document.createElement('h1')
-          root.appendChild(@el1)
-          @el2 = document.createElement('h2')
-          @el1.appendChild(@el2)
-          @el2[:innerText] = @el2[:innerText].to_s + "Hello World"
+          @h1_1 = document.createElement('h1')
+          root.appendChild(@h1_1)
+          @h2_1 = document.createElement('h2')
+          @h1_1.appendChild(@h2_1)
+          @h2_1[:innerText] = @h2_1[:innerText].to_s + "Hello World"
         EX
       )
     end
@@ -78,12 +78,12 @@ RSpec.describe WERB::Compiler do
       compiler = described_class.new('<h1>Hiyo<h2>Hello World</h2></h1>', 'ViewModel')
       expect(compiler.compile_body).to eq(
         <<~EX.chomp
-          @el1 = document.createElement('h1')
-          root.appendChild(@el1)
-          @el1[:innerText] = @el1[:innerText].to_s + "Hiyo"
-          @el2 = document.createElement('h2')
-          @el1.appendChild(@el2)
-          @el2[:innerText] = @el2[:innerText].to_s + "Hello World"
+          @h1_1 = document.createElement('h1')
+          root.appendChild(@h1_1)
+          @h1_1[:innerText] = @h1_1[:innerText].to_s + "Hiyo"
+          @h2_1 = document.createElement('h2')
+          @h1_1.appendChild(@h2_1)
+          @h2_1[:innerText] = @h2_1[:innerText].to_s + "Hello World"
         EX
       )
     end
@@ -103,9 +103,9 @@ RSpec.describe WERB::Compiler do
       compiler = described_class.new('<h1><%= foo %></h1>', 'ViewModel')
       expect(compiler.compile_body).to eq(
         <<~EX.chomp
-          @el1 = document.createElement('h1')
-          root.appendChild(@el1)
-          @el1[:innerText] = @el1[:innerText].to_s + "\#{foo}"
+          @h1_1 = document.createElement('h1')
+          root.appendChild(@h1_1)
+          @h1_1[:innerText] = @h1_1[:innerText].to_s + "\#{foo}"
         EX
       )
     end
@@ -127,9 +127,9 @@ RSpec.describe WERB::Compiler do
       compiler = described_class.new('<div class="container"></div>', 'ViewModel')
       expect(compiler.compile_body).to eq(
         <<~EX.chomp
-          @el1 = document.createElement('div')
-          @el1.setAttribute("class", "container")
-          root.appendChild(@el1)
+          @div_1 = document.createElement('div')
+          @div_1.setAttribute("class", "container")
+          root.appendChild(@div_1)
         EX
       )
     end
@@ -138,9 +138,9 @@ RSpec.describe WERB::Compiler do
       compiler = described_class.new('<div onclick=<%= lambda { |e| p e } %>></div>', 'ViewModel')
       expect(compiler.compile_body).to eq(
         <<~EX.chomp
-          @el1 = document.createElement('div')
-          @el1.addEventListener("click", lambda { |e| p e })
-          root.appendChild(@el1)
+          @div_1 = document.createElement('div')
+          @div_1.addEventListener("click", lambda { |e| p e })
+          root.appendChild(@div_1)
         EX
       )
     end
@@ -149,9 +149,9 @@ RSpec.describe WERB::Compiler do
       compiler = described_class.new('<div data-<%= value %>="bool"></div>', 'ViewModel')
       expect(compiler.compile_body).to eq(
         <<~EX.chomp
-          @el1 = document.createElement('div')
-          @el1.setAttribute("data-\#{value}", "bool")
-          root.appendChild(@el1)
+          @div_1 = document.createElement('div')
+          @div_1.setAttribute("data-\#{value}", "bool")
+          root.appendChild(@div_1)
         EX
       )
     end
@@ -162,10 +162,10 @@ RSpec.describe WERB::Compiler do
       compiler = described_class.new('<div class="container" id="divider"></div>', 'ViewModel')
       expect(compiler.compile_body).to eq(
         <<~EX.chomp
-          @el1 = document.createElement('div')
-          @el1.setAttribute("class", "container")
-          @el1.setAttribute("id", "divider")
-          root.appendChild(@el1)
+          @div_1 = document.createElement('div')
+          @div_1.setAttribute("class", "container")
+          @div_1.setAttribute("id", "divider")
+          root.appendChild(@div_1)
         EX
       )
     end
@@ -183,10 +183,10 @@ RSpec.describe WERB::Compiler do
           private
 
           def setup_dom
-            @el1 = document.createElement('div')
-            @el1.setAttribute("class", "container")
-            @el1.setAttribute("id", "divider")
-            root.appendChild(@el1)
+            @div_1 = document.createElement('div')
+            @div_1.setAttribute("class", "container")
+            @div_1.setAttribute("id", "divider")
+            root.appendChild(@div_1)
           end
 
           def document

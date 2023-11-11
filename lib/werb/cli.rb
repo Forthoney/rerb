@@ -6,6 +6,7 @@ require 'werb'
 require 'werb/templater'
 
 module WERB
+  # Command Line Interface for invoking WERB
   module CLI
     def parse(args)
       parser = OptionParser.new do |o|
@@ -18,9 +19,6 @@ module WERB
         o.on('--root NAME',
              'The html id of the root element to add all other DOM nodes to. ' \
              'Defaults to "root"')
-        o.on('--el_prefix PREFIX',
-             'The prefix to use for the element names in the compiled code. ' \
-             'Defaults to "el"')
         o.on('-v', '--version', 'Output version information and exit.')
       end
       opts = {
@@ -37,13 +35,13 @@ module WERB
       input = File.read(filename)
       case opts[:template]
       when 'umd'
-        res = UMDTemplater.new(filename, opts[:root], opts[:el_prefix])
+        res = UMDTemplater.new(filename, opts[:root])
                           .generate(input)
       when 'iife'
-        res = IIFETemplater.new(filename, opts[:root], opts[:el_prefix])
+        res = IIFETemplater.new(filename, opts[:root])
                            .generate(input)
       when 'nil'
-        res = Templater.new(filename, opts[:root], opts[:el_prefix])
+        res = Templater.new(filename, opts[:root])
                        .generate(input)
       else
         raise 'Invalid template option. Choose between umd, iife, nil.'

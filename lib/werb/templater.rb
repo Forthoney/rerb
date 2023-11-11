@@ -9,14 +9,13 @@ module WERB
   class Templater
     TEMPLATE = '<%= content %>'
 
-    def initialize(filename, root_name, el_name_prefix)
+    def initialize(filename, root_name)
       @viewmodel_name = File.basename(filename, '.*').split('_').map(&:capitalize).join
       @root_name = root_name
-      @el_name_prefix = el_name_prefix
     end
 
     def generate(input)
-      content = Compiler.new(input, @viewmodel_name, @root_name, @el_name_prefix)
+      content = Compiler.new(input, @viewmodel_name, @root_name)
                         .compile
       rhtml = ERB.new(self.class::TEMPLATE)
       rhtml.result(binding)
