@@ -10,16 +10,16 @@ module WERB
     def parse(args)
       parser = OptionParser.new do |o|
         o.banner = 'Usage: werb [options...] FILE'
-        o.on('--template [TYPE]', %w[umd iife nil],
-             'Specify which html template to use to wrap the generated code. ',
+        o.on('--template TYPE', %w[umd iife nil],
+             'Specify which html template to use to wrap the generated code. ' \
              'Valid options are umd, iife, and nil.',
-             'nil will use no template and just output raw ruby.wasm code. ',
+             'nil will use no template and just output raw ruby.wasm code. ' \
              'Defaults to umd')
-        o.on('--root [NAME]',
-             'The html id of the root element to add all other DOM nodes to. ',
+        o.on('--root NAME',
+             'The html id of the root element to add all other DOM nodes to. ' \
              'Defaults to "root"')
-        o.on('--el_prefix [PREFIX]',
-             'The prefix to use for the element names in the compiled code. ',
+        o.on('--el_prefix PREFIX',
+             'The prefix to use for the element names in the compiled code. ' \
              'Defaults to "el"')
         o.on('-v', '--version', 'Output version information and exit.')
       end
@@ -32,7 +32,7 @@ module WERB
       parser.parse!(args, into: opts)
 
       filename = args.shift
-      return puts opts.help if filename.nil?
+      return puts parser.help if filename.nil?
 
       input = File.read(filename)
       case opts[:template]
