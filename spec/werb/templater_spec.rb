@@ -79,7 +79,7 @@ RSpec.describe WERB::Templater do
                   def setup_dom
                     @h1_1 = document.createElement('h1')
                     root.appendChild(@h1_1)
-                    @h1_1[:innerText] = @h1_1[:innerText].to_s + "Hello World"
+                    @h1_1.appendChild(document.createTextNode("Hello World"))
                   end
 
                   def document

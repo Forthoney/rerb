@@ -39,7 +39,6 @@ RSpec.describe WERB::Compiler do
           @h1_1 = document.createElement('h1')
           root.appendChild(@h1_1)
           @h1_1.appendChild(document.createTextNode("Hello World"))
-          @h1_1[:innerText] = @h1_1[:innerText].to_s + "Hello World"
         EX
       )
     end
@@ -86,10 +85,10 @@ RSpec.describe WERB::Compiler do
         <<~EX.chomp
           @h1_1 = document.createElement('h1')
           root.appendChild(@h1_1)
-          @h1_1[:innerText] = @h1_1[:innerText].to_s + "Hello"
+          @h1_1.appendChild(document.createTextNode("Hello"))
           @h2_1 = document.createElement('h2')
           root.appendChild(@h2_1)
-          @h2_1[:innerText] = @h2_1[:innerText].to_s + "World"
+          @h2_1.appendChild(document.createTextNode("World"))
         EX
       )
     end
@@ -126,7 +125,7 @@ RSpec.describe WERB::Compiler do
           root.appendChild(@h1_1)
           @h2_1 = document.createElement('h2')
           @h1_1.appendChild(@h2_1)
-          @h2_1[:innerText] = @h2_1[:innerText].to_s + "Hello World"
+          @h2_1.appendChild(document.createTextNode("Hello World"))
         EX
       )
     end
@@ -137,10 +136,10 @@ RSpec.describe WERB::Compiler do
         <<~EX.chomp
           @h1_1 = document.createElement('h1')
           root.appendChild(@h1_1)
-          @h1_1[:innerText] = @h1_1[:innerText].to_s + "Hiyo"
+          @h1_1.appendChild(document.createTextNode("Hiyo"))
           @h2_1 = document.createElement('h2')
           @h1_1.appendChild(@h2_1)
-          @h2_1[:innerText] = @h2_1[:innerText].to_s + "Hello World"
+          @h2_1.appendChild(document.createTextNode("Hello World"))
         EX
       )
     end
@@ -169,7 +168,7 @@ RSpec.describe WERB::Compiler do
           @h1_1.appendChild(@br_1)
           @h2_1 = document.createElement('h2')
           @h1_1.appendChild(@h2_1)
-          @h2_1[:innerText] = @h2_1[:innerText].to_s + "Hello World"
+          @h2_1.appendChild(document.createTextNode("Hello World"))
         EX
       )
     end
@@ -180,7 +179,7 @@ RSpec.describe WERB::Compiler do
       compiler = described_class.new('<%= foo %>', 'ViewModel')
       expect(compiler.compile_body).to eq(
         <<~EX.chomp
-          root[:innerText] = root[:innerText].to_s + "\#{foo}"
+          root.appendChild(document.createTextNode("\#{foo}"))
         EX
       )
     end
@@ -191,7 +190,7 @@ RSpec.describe WERB::Compiler do
         <<~EX.chomp
           @h1_1 = document.createElement('h1')
           root.appendChild(@h1_1)
-          @h1_1[:innerText] = @h1_1[:innerText].to_s + "\#{foo}"
+          @h1_1.appendChild(document.createTextNode("\#{foo}"))
         EX
       )
     end
@@ -201,7 +200,7 @@ RSpec.describe WERB::Compiler do
       expect(compiler.compile_body).to eq(
         <<~EX.chomp
           if true
-          root[:innerText] = root[:innerText].to_s + "Hello World"
+          root.appendChild(document.createTextNode("Hello World"))
           end
         EX
       )
@@ -212,7 +211,7 @@ RSpec.describe WERB::Compiler do
       expect(compiler.compile_body).to eq(
         <<~EX.chomp
           [1, 2].each do |_|
-          root[:innerText] = root[:innerText].to_s + "Hello World"
+          root.appendChild(document.createTextNode("Hello World"))
           end
         EX
       )
@@ -228,7 +227,7 @@ RSpec.describe WERB::Compiler do
           [1, 2].each do |_|
           @div_1 = document.createElement('div')
           root.appendChild(@div_1)
-          @div_1[:innerText] = @div_1[:innerText].to_s + "Hello World"
+          @div_1.appendChild(document.createTextNode("Hello World"))
           end
         EX
       )
@@ -259,7 +258,7 @@ RSpec.describe WERB::Compiler do
     end
 
     it 'compiles event attributes' do
-      compiler = described_class.new('<div onclick=<%= lambda { |e| p e } %>></div>', 'ViewModel')
+      compiler = described_class.new('<div onclick="<%= lambda { |e| p e } %>"></div>', 'ViewModel')
       expect(compiler.compile_body).to eq(
         <<~EX.chomp
           @div_1 = document.createElement('div')

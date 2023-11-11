@@ -84,7 +84,7 @@ module WERB
       in [:erb, _ind, start_trim, code, end_trim] # ERB expression
         IR::RubyExpr[dom_to_str(compile_ast(code)).strip.to_s]
 
-      in [:tag, nil, tag_name, tag_attr, _solidus] # Opening tag
+      in [:tag, nil, tag_name, tag_attr, _end_solidus] # Opening tag
         tag_type = dom_to_str(compile_ast(tag_name))
         el_name = generate_el_name(tag_type)
         @frames << Frame[el_name]
@@ -96,7 +96,7 @@ module WERB
         current_frame.elems << create
         IR::Content[collect_frame(@frames.pop)]
 
-      in [:tag, _start_solidus, _tag_name, _tag_attr, _solidus] # Closing tag
+      in [:tag, _start_solidus, _tag_name, _tag_attr, _end_solidus] # Closing tag
         IR::Content[collect_frame(@frames.pop)]
 
       in [:attribute, attr_name, _eql_token, attr_value] # Attribute
@@ -111,19 +111,19 @@ module WERB
           IR::Content[%(#{current_frame.name}.setAttribute("#{name}", "#{value}")\n)]
         end
 
+      in [:attribute_value, _start_quote, value, _end_quote]
+        compile_ast(value)
+
       in [:code, code]
         IR::Content["#{code.strip}\n"]
 
       in [:text, *children]
         IR::Content[join_text_children(children)]
 
-      in [:document, *] |
-         [:attribute_value, *] |
-         [:tag_attributes, *]
+      in [:document, *] | [:tag_attributes, *]
         IR::Content[collect_children(node.children, interpolate: false)]
 
-      in [:attribute_name, *] |
-         [:tag_name, *]
+      in [:attribute_name, *] | [:tag_name, *]
         IR::Content[collect_children(node.children, interpolate: true)]
       end
     end
