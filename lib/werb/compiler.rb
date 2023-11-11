@@ -10,6 +10,11 @@ require 'werb/ir'
 module WERB
   # Compile ERB into ruby.wasm compatible code
   class Compiler
+    SELF_CLOSING_TAGS = %w[area base br col
+                           embed hr img input
+                           link meta param
+                           source track wbr].freeze
+
     Frame = Data.define(:name, :elems) do
       # Frame is initialized with an empty array for its elems
       def initialize(name:, elems: [])
@@ -82,18 +87,25 @@ module WERB
       in [:tag, nil, tag_name, tag_attr, _solidus] # Opening tag
         tag_type = dom_to_str(compile_ast(tag_name))
         el_name = generate_el_name(tag_type)
-        @frames.push(Frame[el_name])
+        @frames << Frame[el_name]
         attrs = dom_to_str(compile_ast(tag_attr))
-        IR::Create[el_name, "#{el_name} = document.createElement('#{tag_type}')\n#{attrs}"]
+
+        create = IR::Create[el_name, "#{el_name} = document.createElement('#{tag_type}')\n#{attrs}"]
+        return create unless SELF_CLOSING_TAGS.include? tag_type
+
+        current_frame.elems << create
+        IR::Content[collect_frame(@frames.pop)]
 
       in [:tag, _start_solidus, _tag_name, _tag_attr, _solidus] # Closing tag
         IR::Content[collect_frame(@frames.pop)]
 
       in [:attribute, attr_name, _eql_token, attr_value] # Attribute
         name = dom_to_str(compile_ast(attr_name))
-        if name[0...2] == 'on'
+        if name[0...2] == 'on' # Event
           value = dom_to_str(compile_ast(attr_value), interpolate: false)
           IR::Content[%(#{current_frame.name}.addEventListener("#{name[2...]}", #{value})\n)]
+        elsif attr_value.nil? # Boolean attribute
+          IR::Content[%(#{current_frame.name}.setAttribute("#{name}", true)\n)]
         else
           value = dom_to_str(compile_ast(attr_value), interpolate: true)
           IR::Content[%(#{current_frame.name}.setAttribute("#{name}", "#{value}")\n)]
@@ -125,9 +137,9 @@ module WERB
         in IR::Ignore
           ''
         in IR::Content(content)
-          %(#{f_name}[:innerText] = #{f_name}[:innerText].to_s + "#{content}"\n)
+          %(#{f_name}.appendChild(document.createTextNode("#{content}"))\n)
         in IR::RubyExpr(content)
-          %(#{f_name}[:innerText] = #{f_name}[:innerText].to_s + "\#{#{content}}"\n)
+          %(#{f_name}.appendChild(document.createTextNode("\#{#{content}}"))\n)
         end
       end.join
     end
@@ -152,13 +164,13 @@ module WERB
     end
 
     def collect_children(children, interpolate: false)
-      @frames.push(Frame[current_frame.name])
+      @frames << Frame[current_frame.name]
 
       children.compact.each do |n|
         # compile_ast must be evaluated BEFORE current_frame because current_frame
         # must be reflective of the current frame after whatever mutations compile_ast did
         compiled = compile_ast(n)
-        current_frame.elems.push(compiled)
+        current_frame.elems << compiled
       end
 
       collect_frame(@frames.pop, interpolate:)

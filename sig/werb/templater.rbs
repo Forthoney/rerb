@@ -8,7 +8,7 @@ module WERB
 
     TEMPLATE: String
 
-    def initialize: (String filename, String root_name, String el_name_prefix) -> void
+    def initialize: (String filename, String root_name) -> void
 
     def generate: (String input) -> String
   end
