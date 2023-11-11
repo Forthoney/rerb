@@ -2,7 +2,7 @@
 
 Use ERB/rhtml to build DOMs in [ruby.wasm](https://github.com/ruby/ruby.wasm).
 
-WERB is an unopinionated tool for compiling ERB/rhtml into ruby.wasm DOM operations for building the DOM tree described in the source file. Specifically, it generates code which, when run on a Ruby VM on WASM, generate the desired DOM. Read more about the capabilities of WERB here. 
+WERB is an unopinionated tool for compiling ERB/rhtml into ruby.wasm DOM operations for building the DOM tree described in the source file. Specifically, it generates code which, when run on a Ruby VM on WASM, generate the desired DOM. Read more about the capabilities of WERB [here](docs/capabilities.md). 
 
 This means that WERB is a _developer_'s tool by nature, and not a package like React that is shipped to the client. Speaking of React, WERB is **not** a full blown UI framework and does not aim to be (at least for now). 
 
