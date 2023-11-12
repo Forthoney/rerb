@@ -13,5 +13,3 @@ group :development, :test do
 end
 
 gem 'better_html'
-
-gem 'thor', '~> 1.3'

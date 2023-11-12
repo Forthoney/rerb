@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.email = ['castlehoneyjung@gmail.com']
 
   spec.summary = 'Build a DOM for ruby.wasm with ERB'
-  spec.description = 'Currently, ruby.wasm requires that you manually write DOM operations to build a DOM. WERB automates the process by transpiling ERB into a series of ruby.wasm compatible DOM operations. Thus, you can write or use whatever ERB you already have and use it with ruby.wasm with minimal effort'
+  spec.description = 'WERB is an unopinionated tool for compiling ERB/rhtml into ruby.wasm DOM operations for building the DOM tree described in the source file. Specifically, it generates code which, when run on a Ruby VM on WASM, generate the desired DOM.'
   spec.homepage = 'https://github.com/forthoney/werb'
   spec.license = 'MIT'
   spec.required_ruby_version = '~> 3.2'
