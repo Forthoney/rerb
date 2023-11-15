@@ -3,7 +3,7 @@
 require_relative "lib/rerb/version"
 
 Gem::Specification.new do |spec|
-  spec.name = "RERB"
+  spec.name = "rerb"
   spec.version = RERB::VERSION
   spec.authors = ["Forthoney"]
   spec.email = ["castlehoneyjung@gmail.com"]
