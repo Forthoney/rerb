@@ -1,36 +1,36 @@
 # frozen_string_literal: true
 
-require 'optparse'
+require "optparse"
 
-require 'rerb'
-require 'rerb/templater'
+require "rerb"
+require "rerb/templater"
 
 module RERB
   # Command Line Interface for invoking RERB
   module CLI
     def parse(args)
       parser = OptionParser.new do |o|
-        o.banner = 'Usage: werb [options...] FILE'
+        o.banner = "Usage: werb [options...] FILE"
         o.on(
-          '--template TYPE',
-          ['umd', 'iife', 'nil'],
-          'Specify which html template to use to wrap the generated code. ' \
-            'Valid options are umd, iife, and nil.',
-          'nil will use no template and just output raw ruby.wasm code. ' \
-            'Defaults to umd',
+          "--template TYPE",
+          ["umd", "iife", "nil"],
+          "Specify which html template to use to wrap the generated code. " \
+            "Valid options are umd, iife, and nil.",
+          "nil will use no template and just output raw ruby.wasm code. " \
+            "Defaults to umd",
         )
         o.on(
-          '--root NAME',
-          'The html id of the root element to add all other DOM nodes to. ' \
+          "--root NAME",
+          "The html id of the root element to add all other DOM nodes to. " \
             'Defaults to "root"',
         )
-        o.on('-v', '--version', 'Output version information and exit.')
+        o.on("-v", "--version", "Output version information and exit.")
       end
       opts = {
-        template: 'umd',
-        document: 'document',
-        root: 'root',
-        el_prefix: 'el',
+        template: "umd",
+        document: "document",
+        root: "root",
+        el_prefix: "el",
       }
       parser.parse!(args, into: opts)
 
@@ -39,17 +39,17 @@ module RERB
 
       input = File.read(filename)
       case opts[:template]
-      when 'umd'
+      when "umd"
         res = UMDTemplater.new(filename, opts[:root])
           .generate(input)
-      when 'iife'
+      when "iife"
         res = IIFETemplater.new(filename, opts[:root])
           .generate(input)
-      when 'nil'
+      when "nil"
         res = Templater.new(filename, opts[:root])
           .generate(input)
       else
-        raise 'Invalid template option. Choose between umd, iife, nil.'
+        raise "Invalid template option. Choose between umd, iife, nil."
       end
       puts res
     end

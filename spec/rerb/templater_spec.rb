@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 RSpec.describe(RERB::Templater) do
-  it 'generates HTML file using browser.script.iife.js' do
-    res = RERB::IIFETemplater.new('view_model.erb', 'root')
-      .generate('<h1></h1>')
+  it "generates HTML file using browser.script.iife.js" do
+    res = RERB::IIFETemplater.new("view_model.erb", "root")
+      .generate("<h1></h1>")
     expect(res).to(eq(
       <<~EX.chomp,
         <html>
@@ -44,9 +44,9 @@ RSpec.describe(RERB::Templater) do
     ))
   end
 
-  it 'generates HTML file using browser.umd.js' do
-    res = RERB::UMDTemplater.new('view_model.erb', 'root')
-      .generate('<h1>Hello World</h1>')
+  it "generates HTML file using browser.umd.js" do
+    res = RERB::UMDTemplater.new("view_model.erb", "root")
+      .generate("<h1>Hello World</h1>")
     expect(res).to(eq(
       <<~EX.chomp,
         <html>

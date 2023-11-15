@@ -1,30 +1,30 @@
 # frozen_string_literal: true
 
-require 'better_html'
-require 'better_html/parser'
-require 'better_html/tree/tag'
+require "better_html"
+require "better_html/parser"
+require "better_html/tree/tag"
 
-require 'rerb'
-require 'rerb/ir'
+require "rerb"
+require "rerb/ir"
 
 module RERB
   # Compile ERB into ruby.wasm compatible code
   class Compiler
     SELF_CLOSING_TAGS = [
-      'area',
-      'base',
-      'br',
-      'col',
-      'embed',
-      'hr',
-      'img',
-      'input',
-      'link',
-      'meta',
-      'param',
-      'source',
-      'track',
-      'wbr',
+      "area",
+      "base",
+      "br",
+      "col",
+      "embed",
+      "hr",
+      "img",
+      "input",
+      "link",
+      "meta",
+      "param",
+      "source",
+      "track",
+      "wbr",
     ].freeze
 
     Frame = Data.define(:name, :elems) do
@@ -34,7 +34,7 @@ module RERB
       end
     end
 
-    def initialize(source, viewmodel_name, root_elem_name = 'root')
+    def initialize(source, viewmodel_name, root_elem_name = "root")
       @counter = 0
       @parser = create_parser(source)
       @viewmodel_name = viewmodel_name
@@ -76,7 +76,7 @@ module RERB
     private
 
     def create_parser(source)
-      buffer = Parser::Source::Buffer.new('(buffer)', source:)
+      buffer = Parser::Source::Buffer.new("(buffer)", source:)
       BetterHtml::Parser.new(buffer)
     end
 
@@ -113,7 +113,7 @@ module RERB
 
       in [:attribute, attr_name, _eql_token, attr_value] # Attribute
         name = dom_to_str(compile_ast(attr_name))
-        if name[0...2] == 'on' # Event
+        if name[0...2] == "on" # Event
           value = dom_to_str(compile_ast(attr_value), interpolate: false)
           IR::Content[%(#{current_frame.name}.addEventListener("#{name[2...]}", #{value})\n)]
         elsif attr_value.nil? # Boolean attribute
@@ -147,7 +147,7 @@ module RERB
         in IR::RubyStatement(content)
           "#{content}\n"
         in IR::Ignore
-          ''
+          ""
         in IR::Content(content)
           %(#{f_name}.appendChild(document.createTextNode("#{content}"))\n)
         in IR::RubyExpr(content)
@@ -167,7 +167,7 @@ module RERB
       in IR::RubyExpr(content)
         interpolate ? "\#{#{content}}" : content.to_s
       in IR::Ignore
-        ''
+        ""
       end
     end
 

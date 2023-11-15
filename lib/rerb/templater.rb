@@ -1,16 +1,16 @@
 # frozen_string_literal: true
 
-require 'erb'
+require "erb"
 
-require 'rerb'
-require 'rerb/compiler'
+require "rerb"
+require "rerb/compiler"
 
 module RERB
   class Templater
-    TEMPLATE = '<%= content %>'
+    TEMPLATE = "<%= content %>"
 
     def initialize(filename, root_name)
-      @viewmodel_name = File.basename(filename, '.*').split('_').map(&:capitalize).join
+      @viewmodel_name = File.basename(filename, ".*").split("_").map(&:capitalize).join
       @root_name = root_name
     end
 

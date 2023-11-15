@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 RSpec.describe(RERB::Compiler) do
-  context 'with only pure html elements' do
-    it 'compiles single element' do
-      compiler = described_class.new('<h1></h1>', 'ViewModel')
+  context "with only pure html elements" do
+    it "compiles single element" do
+      compiler = described_class.new("<h1></h1>", "ViewModel")
       expect(compiler.compile_body).to(eq(
         <<~EX.chomp,
           @h1_1 = document.createElement('h1')
@@ -12,8 +12,8 @@ RSpec.describe(RERB::Compiler) do
       ))
     end
 
-    it 'compiles self-closing element without ending solidus' do
-      compiler = described_class.new('<input>', 'ViewModel')
+    it "compiles self-closing element without ending solidus" do
+      compiler = described_class.new("<input>", "ViewModel")
       expect(compiler.compile_body).to(eq(
         <<~EX.chomp,
           @input_1 = document.createElement('input')
@@ -22,8 +22,8 @@ RSpec.describe(RERB::Compiler) do
       ))
     end
 
-    it 'compiles self-closing element withending solidus' do
-      compiler = described_class.new('<input/>', 'ViewModel')
+    it "compiles self-closing element withending solidus" do
+      compiler = described_class.new("<input/>", "ViewModel")
       expect(compiler.compile_body).to(eq(
         <<~EX.chomp,
           @input_1 = document.createElement('input')
@@ -32,8 +32,8 @@ RSpec.describe(RERB::Compiler) do
       ))
     end
 
-    it 'compiles single element with text' do
-      compiler = described_class.new('<h1>Hello World</h1>', 'ViewModel')
+    it "compiles single element with text" do
+      compiler = described_class.new("<h1>Hello World</h1>", "ViewModel")
       expect(compiler.compile_body).to(eq(
         <<~EX.chomp,
           @h1_1 = document.createElement('h1')
@@ -43,8 +43,8 @@ RSpec.describe(RERB::Compiler) do
       ))
     end
 
-    it 'compiles sibling elements' do
-      compiler = described_class.new('<h1></h1><h2></h2>', 'ViewModel')
+    it "compiles sibling elements" do
+      compiler = described_class.new("<h1></h1><h2></h2>", "ViewModel")
       expect(compiler.compile_body).to(eq(
         <<~EX.chomp,
           @h1_1 = document.createElement('h1')
@@ -55,8 +55,8 @@ RSpec.describe(RERB::Compiler) do
       ))
     end
 
-    it 'compiles sibling elements with prior being a self-closing tag' do
-      compiler = described_class.new('<img><h2></h2>', 'ViewModel')
+    it "compiles sibling elements with prior being a self-closing tag" do
+      compiler = described_class.new("<img><h2></h2>", "ViewModel")
       expect(compiler.compile_body).to(eq(
         <<~EX.chomp,
           @img_1 = document.createElement('img')
@@ -67,8 +67,8 @@ RSpec.describe(RERB::Compiler) do
       ))
     end
 
-    it 'compiles sibling elements with latter being a self-closing tag' do
-      compiler = described_class.new('<h1></h1><img>', 'ViewModel')
+    it "compiles sibling elements with latter being a self-closing tag" do
+      compiler = described_class.new("<h1></h1><img>", "ViewModel")
       expect(compiler.compile_body).to(eq(
         <<~EX.chomp,
           @h1_1 = document.createElement('h1')
@@ -79,8 +79,8 @@ RSpec.describe(RERB::Compiler) do
       ))
     end
 
-    it 'compiles sibling elements with text' do
-      compiler = described_class.new('<h1>Hello</h1><h2>World</h2>', 'ViewModel')
+    it "compiles sibling elements with text" do
+      compiler = described_class.new("<h1>Hello</h1><h2>World</h2>", "ViewModel")
       expect(compiler.compile_body).to(eq(
         <<~EX.chomp,
           @h1_1 = document.createElement('h1')
@@ -93,8 +93,8 @@ RSpec.describe(RERB::Compiler) do
       ))
     end
 
-    it 'compiles nested elements' do
-      compiler = described_class.new('<h1><h2></h2></h1>', 'ViewModel')
+    it "compiles nested elements" do
+      compiler = described_class.new("<h1><h2></h2></h1>", "ViewModel")
       expect(compiler.compile_body).to(eq(
         <<~EX.chomp,
           @h1_1 = document.createElement('h1')
@@ -105,8 +105,8 @@ RSpec.describe(RERB::Compiler) do
       ))
     end
 
-    it 'compiles nested elements with self-closing tag as child' do
-      compiler = described_class.new('<h1><br/></h1>', 'ViewModel')
+    it "compiles nested elements with self-closing tag as child" do
+      compiler = described_class.new("<h1><br/></h1>", "ViewModel")
       expect(compiler.compile_body).to(eq(
         <<~EX.chomp,
           @h1_1 = document.createElement('h1')
@@ -117,8 +117,8 @@ RSpec.describe(RERB::Compiler) do
       ))
     end
 
-    it 'compiles nested elements with text in child' do
-      compiler = described_class.new('<h1><h2>Hello World</h2></h1>', 'ViewModel')
+    it "compiles nested elements with text in child" do
+      compiler = described_class.new("<h1><h2>Hello World</h2></h1>", "ViewModel")
       expect(compiler.compile_body).to(eq(
         <<~EX.chomp,
           @h1_1 = document.createElement('h1')
@@ -130,8 +130,8 @@ RSpec.describe(RERB::Compiler) do
       ))
     end
 
-    it 'compiles nested elements with text in child and parent' do
-      compiler = described_class.new('<h1>Hiyo<h2>Hello World</h2></h1>', 'ViewModel')
+    it "compiles nested elements with text in child and parent" do
+      compiler = described_class.new("<h1>Hiyo<h2>Hello World</h2></h1>", "ViewModel")
       expect(compiler.compile_body).to(eq(
         <<~EX.chomp,
           @h1_1 = document.createElement('h1')
@@ -144,8 +144,8 @@ RSpec.describe(RERB::Compiler) do
       ))
     end
 
-    it 'compiles nested elements with regular and self-closing tags as children' do
-      compiler = described_class.new('<h1><br/><div></div></h1>', 'ViewModel')
+    it "compiles nested elements with regular and self-closing tags as children" do
+      compiler = described_class.new("<h1><br/><div></div></h1>", "ViewModel")
       expect(compiler.compile_body).to(eq(
         <<~EX.chomp,
           @h1_1 = document.createElement('h1')
@@ -158,8 +158,8 @@ RSpec.describe(RERB::Compiler) do
       ))
     end
 
-    it 'compiles nested elements with regular tag with text and self-closing tag as children' do
-      compiler = described_class.new('<h1><br/><h2>Hello World</h2></h1>', 'ViewModel')
+    it "compiles nested elements with regular tag with text and self-closing tag as children" do
+      compiler = described_class.new("<h1><br/><h2>Hello World</h2></h1>", "ViewModel")
       expect(compiler.compile_body).to(eq(
         <<~EX.chomp,
           @h1_1 = document.createElement('h1')
@@ -174,9 +174,9 @@ RSpec.describe(RERB::Compiler) do
     end
   end
 
-  context 'with ERB embeddings' do
-    it 'compiles erb expression' do
-      compiler = described_class.new('<%= foo %>', 'ViewModel')
+  context "with ERB embeddings" do
+    it "compiles erb expression" do
+      compiler = described_class.new("<%= foo %>", "ViewModel")
       expect(compiler.compile_body).to(eq(
         <<~EX.chomp,
           root.appendChild(document.createTextNode("\#{foo}"))
@@ -184,8 +184,8 @@ RSpec.describe(RERB::Compiler) do
       ))
     end
 
-    it 'compiles nested erb expression' do
-      compiler = described_class.new('<h1><%= foo %></h1>', 'ViewModel')
+    it "compiles nested erb expression" do
+      compiler = described_class.new("<h1><%= foo %></h1>", "ViewModel")
       expect(compiler.compile_body).to(eq(
         <<~EX.chomp,
           @h1_1 = document.createElement('h1')
@@ -195,8 +195,8 @@ RSpec.describe(RERB::Compiler) do
       ))
     end
 
-    it 'compiles erb if statement' do
-      compiler = described_class.new('<% if true %>Hello World<% end %>', 'ViewModel')
+    it "compiles erb if statement" do
+      compiler = described_class.new("<% if true %>Hello World<% end %>", "ViewModel")
       expect(compiler.compile_body).to(eq(
         <<~EX.chomp,
           if true
@@ -206,8 +206,8 @@ RSpec.describe(RERB::Compiler) do
       ))
     end
 
-    it 'compiles erb loop' do
-      compiler = described_class.new('<% [1, 2].each do |_| %>Hello World<% end %>', 'ViewModel')
+    it "compiles erb loop" do
+      compiler = described_class.new("<% [1, 2].each do |_| %>Hello World<% end %>", "ViewModel")
       expect(compiler.compile_body).to(eq(
         <<~EX.chomp,
           [1, 2].each do |_|
@@ -217,10 +217,10 @@ RSpec.describe(RERB::Compiler) do
       ))
     end
 
-    it 'compiles erb loop with element inside' do
+    it "compiles erb loop with element inside" do
       compiler = described_class.new(
-        '<% [1, 2].each do |_| %><div>Hello World</div><% end %>',
-        'ViewModel',
+        "<% [1, 2].each do |_| %><div>Hello World</div><% end %>",
+        "ViewModel",
       )
       expect(compiler.compile_body).to(eq(
         <<~EX.chomp,
@@ -234,9 +234,9 @@ RSpec.describe(RERB::Compiler) do
     end
   end
 
-  context 'with html elements containing an attribute' do
-    it 'compiles name-value attributes' do
-      compiler = described_class.new('<div class="container"></div>', 'ViewModel')
+  context "with html elements containing an attribute" do
+    it "compiles name-value attributes" do
+      compiler = described_class.new('<div class="container"></div>', "ViewModel")
       expect(compiler.compile_body).to(eq(
         <<~EX.chomp,
           @div_1 = document.createElement('div')
@@ -246,8 +246,8 @@ RSpec.describe(RERB::Compiler) do
       ))
     end
 
-    it 'compiles name-value attributes on self-closing tag' do
-      compiler = described_class.new('<input class="danger"/>', 'ViewModel')
+    it "compiles name-value attributes on self-closing tag" do
+      compiler = described_class.new('<input class="danger"/>', "ViewModel")
       expect(compiler.compile_body).to(eq(
         <<~EX.chomp,
           @input_1 = document.createElement('input')
@@ -257,8 +257,8 @@ RSpec.describe(RERB::Compiler) do
       ))
     end
 
-    it 'compiles event attributes' do
-      compiler = described_class.new('<div onclick="<%= lambda { |e| p e } %>"></div>', 'ViewModel')
+    it "compiles event attributes" do
+      compiler = described_class.new('<div onclick="<%= lambda { |e| p e } %>"></div>', "ViewModel")
       expect(compiler.compile_body).to(eq(
         <<~EX.chomp,
           @div_1 = document.createElement('div')
@@ -268,8 +268,8 @@ RSpec.describe(RERB::Compiler) do
       ))
     end
 
-    it 'compiles attribute names with erb' do
-      compiler = described_class.new('<div data-<%= value %>="bool"></div>', 'ViewModel')
+    it "compiles attribute names with erb" do
+      compiler = described_class.new('<div data-<%= value %>="bool"></div>', "ViewModel")
       expect(compiler.compile_body).to(eq(
         <<~EX.chomp,
           @div_1 = document.createElement('div')
@@ -279,8 +279,8 @@ RSpec.describe(RERB::Compiler) do
       ))
     end
 
-    it 'compiles attribute values with erb' do
-      compiler = described_class.new('<div data="<%= value %>"></div>', 'ViewModel')
+    it "compiles attribute values with erb" do
+      compiler = described_class.new('<div data="<%= value %>"></div>', "ViewModel")
       expect(compiler.compile_body).to(eq(
         <<~EX.chomp,
           @div_1 = document.createElement('div')
@@ -290,8 +290,8 @@ RSpec.describe(RERB::Compiler) do
       ))
     end
 
-    it 'compiles boolean attributes' do
-      compiler = described_class.new('<div hidden></div>', 'ViewModel')
+    it "compiles boolean attributes" do
+      compiler = described_class.new("<div hidden></div>", "ViewModel")
       expect(compiler.compile_body).to(eq(
         <<~EX.chomp,
           @div_1 = document.createElement('div')
@@ -301,8 +301,8 @@ RSpec.describe(RERB::Compiler) do
       ))
     end
 
-    it 'compiles multiple name-value attributes' do
-      compiler = described_class.new('<div class="container" id="box"></div>', 'ViewModel')
+    it "compiles multiple name-value attributes" do
+      compiler = described_class.new('<div class="container" id="box"></div>', "ViewModel")
       expect(compiler.compile_body).to(eq(
         <<~EX.chomp,
           @div_1 = document.createElement('div')
@@ -313,8 +313,8 @@ RSpec.describe(RERB::Compiler) do
       ))
     end
 
-    it 'compiles multiple name-value attributes and boolean attribute' do
-      compiler = described_class.new('<div class="container" id="box" hidden></div>', 'ViewModel')
+    it "compiles multiple name-value attributes and boolean attribute" do
+      compiler = described_class.new('<div class="container" id="box" hidden></div>', "ViewModel")
       expect(compiler.compile_body).to(eq(
         <<~EX.chomp,
           @div_1 = document.createElement('div')
@@ -326,8 +326,8 @@ RSpec.describe(RERB::Compiler) do
       ))
     end
 
-    it 'compiles multiple name-value attributes and boolean attribute on self-closing tag' do
-      compiler = described_class.new('<input class="in" id="form-input" hidden>', 'ViewModel')
+    it "compiles multiple name-value attributes and boolean attribute on self-closing tag" do
+      compiler = described_class.new('<input class="in" id="form-input" hidden>', "ViewModel")
       expect(compiler.compile_body).to(eq(
         <<~EX.chomp,
           @input_1 = document.createElement('input')
@@ -340,9 +340,9 @@ RSpec.describe(RERB::Compiler) do
     end
   end
 
-  context 'with html elements containing multiple attributes' do
-    it 'compiles name-value attributes' do
-      compiler = described_class.new('<div class="container" id="divider"></div>', 'ViewModel')
+  context "with html elements containing multiple attributes" do
+    it "compiles name-value attributes" do
+      compiler = described_class.new('<div class="container" id="divider"></div>', "ViewModel")
       expect(compiler.compile_body).to(eq(
         <<~EX.chomp,
           @div_1 = document.createElement('div')
@@ -354,8 +354,8 @@ RSpec.describe(RERB::Compiler) do
     end
   end
 
-  it 'compiles full classes' do
-    compiler = described_class.new('<div class="container" id="divider"></div>', 'ViewModel')
+  it "compiles full classes" do
+    compiler = described_class.new('<div class="container" id="divider"></div>', "ViewModel")
     expect(compiler.compile).to(eq(
       <<~EX.chomp,
         class ViewModel

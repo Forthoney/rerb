@@ -10,31 +10,5 @@ AllCops:
 Gemspec/RequireMFA:
   Enabled: false
 
-Style/StringLiterals:
-  Enabled: true
-  EnforcedStyle: single_quotes
-
-Style/StringLiteralsInInterpolation:
-  Enabled: true
-  EnforcedStyle: double_quotes
-
-Layout/LineLength:
-  Max: 120
-  Exclude:
-  - 'werb.gemspec'
-
-Metrics/MethodLength:
-  Max: 15
-
-Layout/FirstArgumentIndentation:
-  Enabled: true
-  Exclude:
-    - 'spec/*'
-
-Style/RedundantPercentQ:
-  Enabled: true
-  Exclude:
-    - 'spec/werb/compiler_spec.rb'
-
 RSpec/ExampleLength:
   Enabled: false
