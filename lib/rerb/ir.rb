@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module WERB
+module RERB
   # Intermediate Representation Nodes
   module IR
     # Generic HTML Content

@@ -13,7 +13,7 @@ module BetterHtml
   end
 end
 
-module WERB
+module RERB
   # Compile ERB into ruby.wasm compatible code
   class Compiler
     class Frame < Data

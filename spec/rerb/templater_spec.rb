@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-RSpec.describe WERB::Templater do
+RSpec.describe RERB::Templater do
   it 'generates HTML file using browser.script.iife.js' do
-    res = WERB::IIFETemplater.new('view_model.erb', 'root')
+    res = RERB::IIFETemplater.new('view_model.erb', 'root')
                              .generate('<h1></h1>')
     expect(res).to eq(
       <<~EX.chomp
@@ -45,7 +45,7 @@ RSpec.describe WERB::Templater do
   end
 
   it 'generates HTML file using browser.umd.js' do
-    res = WERB::UMDTemplater.new('view_model.erb', 'root')
+    res = RERB::UMDTemplater.new('view_model.erb', 'root')
                             .generate('<h1>Hello World</h1>')
     expect(res).to eq(
       <<~EX.chomp

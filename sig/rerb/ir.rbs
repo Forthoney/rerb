@@ -1,4 +1,4 @@
-module WERB
+module RERB
   # Intermediate Representation Nodes
   module IR
     class Content < Data end

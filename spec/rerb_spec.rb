@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-RSpec.describe WERB do
+RSpec.describe RERB do
   it 'has a version number' do
-    expect(WERB::VERSION).not_to be_nil
+    expect(RERB::VERSION).not_to be_nil
   end
 end

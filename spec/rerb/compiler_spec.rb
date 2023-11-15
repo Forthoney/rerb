@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe WERB::Compiler do
+RSpec.describe RERB::Compiler do
   context 'with only pure html elements' do
     it 'compiles single element' do
       compiler = described_class.new('<h1></h1>', 'ViewModel')

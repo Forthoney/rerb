@@ -2,10 +2,10 @@
 
 require 'erb'
 
-require 'werb'
-require 'werb/compiler'
+require 'rerb'
+require 'rerb/compiler'
 
-module WERB
+module RERB
   class Templater
     TEMPLATE = '<%= content %>'
 

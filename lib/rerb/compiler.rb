@@ -4,10 +4,10 @@ require 'better_html'
 require 'better_html/parser'
 require 'better_html/tree/tag'
 
-require 'werb'
-require 'werb/ir'
+require 'rerb'
+require 'rerb/ir'
 
-module WERB
+module RERB
   # Compile ERB into ruby.wasm compatible code
   class Compiler
     SELF_CLOSING_TAGS = %w[area base br col

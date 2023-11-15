@@ -2,11 +2,11 @@
 
 require 'optparse'
 
-require 'werb'
-require 'werb/templater'
+require 'rerb'
+require 'rerb/templater'
 
-module WERB
-  # Command Line Interface for invoking WERB
+module RERB
+  # Command Line Interface for invoking RERB
   module CLI
     def parse(args)
       parser = OptionParser.new do |o|

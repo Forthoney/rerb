@@ -1,22 +1,22 @@
 # frozen_string_literal: true
 
-require_relative 'lib/werb/version'
+require_relative 'lib/rerb/version'
 
 Gem::Specification.new do |spec|
-  spec.name = 'WERB'
-  spec.version = WERB::VERSION
+  spec.name = 'RERB'
+  spec.version = RERB::VERSION
   spec.authors = ['Forthoney']
   spec.email = ['castlehoneyjung@gmail.com']
 
   spec.summary = 'Build a DOM for ruby.wasm with ERB'
-  spec.description = 'WERB is an unopinionated tool for compiling ERB/rhtml into ruby.wasm DOM operations for building the DOM tree described in the source file. Specifically, it generates code which, when run on a Ruby VM on WASM, generate the desired DOM.'
+  spec.description = 'RERB is an unopinionated tool for compiling ERB/rhtml into ruby.wasm DOM operations for building the DOM tree described in the source file. Specifically, it generates code which, when run on a Ruby VM on WASM, generate the desired DOM.'
   spec.homepage = 'https://github.com/forthoney/werb'
   spec.license = 'MIT'
   spec.required_ruby_version = '~> 3.2'
 
   spec.metadata['homepage_uri'] = spec.homepage
-  spec.metadata['source_code_uri'] = 'https://github.com/forthoney/werb'
-  spec.metadata['changelog_uri'] = 'https://github.com/Forthoney/werb/blob/main/CHANGELOG.md'
+  spec.metadata['source_code_uri'] = 'https://github.com/forthoney/rerb'
+  spec.metadata['changelog_uri'] = 'https://github.com/Forthoney/rerb/blob/main/CHANGELOG.md'
 
   # Specify which files should be added to the gem when it is released.
   # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
@@ -27,7 +27,7 @@ Gem::Specification.new do |spec|
     end
   end
   spec.bindir = 'exe'
-  spec.executables << 'werb'
+  spec.executables << 'rerb'
   spec.require_paths = ['lib']
 
   # Uncomment to register a new dependency of your gem

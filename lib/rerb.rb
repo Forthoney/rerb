@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-require_relative 'werb/version'
-require 'werb/compiler'
-require 'werb/templater'
-require 'werb/cli'
-require 'werb/ir'
+require_relative 'rerb/version'
+require 'rerb/compiler'
+require 'rerb/templater'
+require 'rerb/cli'
+require 'rerb/ir'
 
-module WERB
+module RERB
   class Error < StandardError; end
 
   class EmptyFrameError < Error

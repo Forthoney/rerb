@@ -1,4 +1,4 @@
-module WERB
+module RERB
   class Templater
     @viewmodel_name: String
 
