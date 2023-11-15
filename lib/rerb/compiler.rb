@@ -10,10 +10,22 @@ require 'rerb/ir'
 module RERB
   # Compile ERB into ruby.wasm compatible code
   class Compiler
-    SELF_CLOSING_TAGS = %w[area base br col
-                           embed hr img input
-                           link meta param
-                           source track wbr].freeze
+    SELF_CLOSING_TAGS = [
+      'area',
+      'base',
+      'br',
+      'col',
+      'embed',
+      'hr',
+      'img',
+      'input',
+      'link',
+      'meta',
+      'param',
+      'source',
+      'track',
+      'wbr',
+    ].freeze
 
     Frame = Data.define(:name, :elems) do
       # Frame is initialized with an empty array for its elems
@@ -91,7 +103,7 @@ module RERB
         attrs = dom_to_str(compile_ast(tag_attr))
 
         create = IR::Create[el_name, "#{el_name} = document.createElement('#{tag_type}')\n#{attrs}"]
-        return create unless SELF_CLOSING_TAGS.include? tag_type
+        return create unless SELF_CLOSING_TAGS.include?(tag_type)
 
         current_frame.elems << create
         IR::Content[collect_frame(@frames.pop)]

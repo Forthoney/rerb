@@ -1,5 +1,8 @@
 require: rubocop-rspec
 
+inherit_gem:
+  rubocop-shopify: rubocop.yml
+
 AllCops:
   TargetRubyVersion: 3.2
   NewCops: enable

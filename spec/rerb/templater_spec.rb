@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-RSpec.describe RERB::Templater do
+RSpec.describe(RERB::Templater) do
   it 'generates HTML file using browser.script.iife.js' do
     res = RERB::IIFETemplater.new('view_model.erb', 'root')
-                             .generate('<h1></h1>')
-    expect(res).to eq(
-      <<~EX.chomp
+      .generate('<h1></h1>')
+    expect(res).to(eq(
+      <<~EX.chomp,
         <html>
           <head>
             <script src="https://cdn.jsdelivr.net/npm/ruby-head-wasm-wasi@2.1.0/dist/browser.script.iife.js"></script>
@@ -41,14 +41,14 @@ RSpec.describe RERB::Templater do
           </body>
         </html>
       EX
-    )
+    ))
   end
 
   it 'generates HTML file using browser.umd.js' do
     res = RERB::UMDTemplater.new('view_model.erb', 'root')
-                            .generate('<h1>Hello World</h1>')
-    expect(res).to eq(
-      <<~EX.chomp
+      .generate('<h1>Hello World</h1>')
+    expect(res).to(eq(
+      <<~EX.chomp,
         <html>
           <script src="https://cdn.jsdelivr.net/npm/@ruby/wasm-wasi@latest/dist/browser.umd.js"></script>
           <script>
@@ -102,6 +102,6 @@ RSpec.describe RERB::Templater do
           </body>
         </html>
       EX
-    )
+    ))
   end
 end

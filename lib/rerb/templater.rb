@@ -16,7 +16,7 @@ module RERB
 
     def generate(input)
       content = Compiler.new(input, @viewmodel_name, @root_name)
-                        .compile
+        .compile
       rhtml = ERB.new(self.class::TEMPLATE)
       rhtml.result(binding)
     end
