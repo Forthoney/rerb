@@ -2,21 +2,18 @@
 
 Use ERB/rhtml to build DOMs in [ruby.wasm](https://github.com/ruby/ruby.wasm).
 
-RERB is an unopinionated tool for compiling ERB/rhtml into ruby.wasm DOM operations for building the DOM tree described in the source file. Specifically, it generates code which, when run on a Ruby VM on WASM, generate the desired DOM. Read more about the capabilities of RERB [here](docs/capabilities.md).
-
-This means that RERB is a _developer_'s tool by nature, and not a package like React that is shipped to the client. Speaking of React, RERB is **not** a full blown UI framework and does not aim to be (at least for now).
+RERB is an unopinionated tool for compiling ERB/rhtml into ruby.wasm DOM operations for building the DOM tree described in the source file. Specifically, it generates code which, when run on a Ruby VM on WASM, generate the desired DOM. 
+RERB is experimental and very young, so there are some usage caveats which you can read about [here](docs/capabilities.md).
 
 ## Installation
 
-TODO: Replace `UPDATE_WITH_YOUR_GEM_NAME_PRIOR_TO_RELEASE_TO_RUBYGEMS_ORG` with your gem name right after releasing it to RubyGems.org. Please do not do it earlier due to security reasons. Alternatively, replace this section with instructions to install your gem from git if you don't plan to release to RubyGems.org.
-
 Install the gem and add to the application's Gemfile by executing:
 
-    $ bundle add UPDATE_WITH_YOUR_GEM_NAME_PRIOR_TO_RELEASE_TO_RUBYGEMS_ORG
+    $ bundle add RERB
 
 If bundler is not being used to manage dependencies, install the gem by executing:
 
-    $ gem install UPDATE_WITH_YOUR_GEM_NAME_PRIOR_TO_RELEASE_TO_RUBYGEMS_ORG
+    $ gem install RERB
 
 ## Usage
 ### For Developers
@@ -24,7 +21,7 @@ The CLI is the recommended way to use RERB in development. The simplest way to c
 ```bash
 rerb your-file.erb
 ```
-RERB will compile this erb file into a HTML file which internally uses ruby.wasm DOM operations to generate the DOM in the erb file. If you want to save this output to a file, you can simply do
+RERB will compile this erb file into a HTML file which internally uses ruby.wasm DOM operations to generate the DOM in the erb file. If you want to save this output to a file, you can simply use the shell `>` operator to write the output into a file.
 ```bash
 rerb your-file.erb > your-file.html
 ```
