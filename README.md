@@ -45,6 +45,7 @@ To install this gem onto your local machine, run `bundle exec rake install`.
 
 ## Contributing
 
+Reading the [capabilities (and limitations)](docs/capabilities.md) is highly recommended. The current limitations of RERB listed in the document would be a great place to start looking for places to possibly contribute.
 Bug reports and pull requests are welcome on GitHub at https://github.com/forthoney/rerb. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/forthoney/rerb/blob/main/CODE_OF_CONDUCT.md).
 
 ## License
