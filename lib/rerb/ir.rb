@@ -21,49 +21,59 @@ module RERB
 
       def ir_to_s(elem, interpolate: false)
         case elem
-        in Create(el_name, parent_name, tag_type, attributes)
+        in Create(el_name:, parent_name:, tag_type:, attributes:)
           "#{el_name} = document.createElement('#{ir_to_s(tag_type)}')\n" +
             ir_to_s(attributes) + "#{parent_name}.appendChild(#{el_name})\n"
-        in Container(frame)
+
+        in Container(frame:)
           frame.elems.map { |e| ir_to_s(e, interpolate:) }.join
-        in InterpolateContainer(frame)
+
+        in InterpolateContainer(frame:)
           frame.elems.map { |e| ir_to_s(e, interpolate: true) }.join
-        in TextContainer(frame)
-          frame.elems.map do |c|
-            child_ir_to_s(c, frame.name)
-          end.join
-        in RubyStatement(code)
+
+        in TextContainer(frame:)
+          frame.elems.map { |e| text_ir_to_s(e, frame.name) }.join
+
+        in RubyStatement(code:)
           ir_to_s(code) + "\n"
-        in RubyExpr(code)
+
+        in RubyExpr(code:)
           interpolate ? "\#{#{ir_to_s(code)}}" : ir_to_s(code)
-        in Attribute(target, name, value)
-          attr_name = ir_to_s(name)
-          if attr_name[0...2] == "on" # Event
-            attr_value = ir_to_s(value, interpolate: false)
-            %(#{target}.addEventListener("#{attr_name[2...]}", #{attr_value})\n)
-          elsif value.is_a?(Ignore) # Boolean attribute
-            %(#{target}.setAttribute("#{attr_name}", true)\n)
-          else # Standard attribute
-            attr_value = ir_to_s(value, interpolate: true)
-            %(#{target}.setAttribute("#{attr_name}", "#{attr_value}")\n)
-          end
+
+        in Attribute(target:, name:, value: Ignore) # Boolean attribute
+          %(#{target}.setAttribute("#{ir_to_s(name)}", true)\n)
+
+        in Attribute(target:, name:, value:)
+          attr_ir_to_s(target, name, value)
+
+        in Text(content:)
+          content.strip
+
         in Ignore
           +""
-        in Text(content)
-          content.strip
         end
       end
 
-      def child_ir_to_s(child, frame_name)
-        case child
-        in RubyStatement(content)
-          "#{content.strip}\n"
-        in Text(content)
-          %(#{frame_name}.appendChild(document.createTextNode("#{content}"))\n)
-        in RubyExpr(content)
-          %(#{frame_name}.appendChild(document.createTextNode("\#{#{content.strip}}"))\n)
-        in Ignore
-          ""
+      private
+
+      def text_ir_to_s(ir, frame_name)
+        result = ir_to_s(ir, interpolate: true)
+        case ir
+        when Text, RubyExpr
+          %(#{frame_name}.appendChild(document.createTextNode("#{result}"))\n)
+        else
+          result
+        end
+      end
+
+      def attr_ir_to_s(target, name, value)
+        attr_name = ir_to_s(name)
+        if attr_name[0...2] == "on" # Event
+          attr_value = ir_to_s(value, interpolate: false)
+          %(#{target}.addEventListener("#{attr_name[2...]}", #{attr_value})\n)
+        else # Standard attribute
+          attr_value = ir_to_s(value, interpolate: true)
+          %(#{target}.setAttribute("#{attr_name}", "#{attr_value}")\n)
         end
       end
     end

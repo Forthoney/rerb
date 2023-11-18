@@ -86,11 +86,14 @@ module RERB
       in String
         node.strip.empty? ? IR::Ignore[] : IR::Text[node]
 
-      in [:erb, nil, _start_trim, [:code, code], _end_trim] # ERB statement
-        IR::RubyStatement[code]
+      in [:code, code]
+        IR::Text[code]
 
-      in [:erb, _ind, _start_trim, [:code, code], _end_trim] # ERB expression
-        IR::RubyExpr[code]
+      in [:erb, nil, _start_trim, code, _end_trim] # ERB statement
+        IR::RubyStatement[node_to_ir(code)]
+
+      in [:erb, _ind, _start_trim, code, _end_trim] # ERB expression
+        IR::RubyExpr[node_to_ir(code)]
 
       in [:tag, nil, tag_name, tag_attr, _end_solidus] # Opening tag
         tag_type = tag_name.children[0]
@@ -112,24 +115,20 @@ module RERB
       in [:attribute_value, _start_quote, value, _end_quote]
         node_to_ir(value)
 
+      in [:attribute_name, *] | [:tag_name, *]
+        IR::InterpolateContainer[collect_children(node.children)]
+
       in [:text, *children]
         IR::TextContainer[collect_children(children)]
 
       in [:document, *] | [:tag_attributes, *]
         IR::Container[collect_children(node.children)]
-
-      in [:attribute_name, *] | [:tag_name, *]
-        IR::InterpolateContainer[collect_children(node.children)]
       end
     end
 
     def create_parser(source)
       buffer = Parser::Source::Buffer.new("(buffer)", source:)
       BetterHtml::Parser.new(buffer)
-    end
-
-    def collect_frame(frame, interpolate: false)
-      frame.elems.map { |e| export(e, interpolate:) }.join
     end
 
     def collect_children(children, interpolate: false)
