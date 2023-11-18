@@ -71,12 +71,12 @@ module RERB
     end
 
     def compile_body
-      export(compile_node(@parser.ast)).strip
+      @exporter.ir_to_s(node_to_ir(@parser.ast)).strip
     end
 
     private
 
-    def compile_node(node)
+    def node_to_ir(node)
       # Unfortunately, this very ugly pattern matching is the only way to
       # pattern match the AST::Nodes from better-html
       case node
@@ -84,55 +84,42 @@ module RERB
         IR::Ignore[]
 
       in String
-        node.strip.empty? ? IR::Ignore[] : IR::Content[node.strip]
+        node.strip.empty? ? IR::Ignore[] : IR::Text[node]
 
-      in [:erb, nil, _start_trim, code, _end_trim] # ERB statement
-        IR::RubyStatement[export(compile_node(code)).strip.to_s]
+      in [:erb, nil, _start_trim, [:code, code], _end_trim] # ERB statement
+        IR::RubyStatement[code]
 
-      in [:erb, _ind, _start_trim, code, _end_trim] # ERB expression
-        IR::RubyExpr[export(compile_node(code)).strip.to_s]
+      in [:erb, _ind, _start_trim, [:code, code], _end_trim] # ERB expression
+        IR::RubyExpr[code]
 
       in [:tag, nil, tag_name, tag_attr, _end_solidus] # Opening tag
-        tag_type = export(compile_node(tag_name))
+        tag_type = tag_name.children[0]
         el_name = generate_el_name(tag_type)
+        parent_name = current_frame.name
         @frames << Frame[el_name]
-        attrs = export(compile_node(tag_attr))
-
-        create = IR::Create[el_name, "#{el_name} = document.createElement('#{tag_type}')\n#{attrs}"]
+        create = IR::Create[el_name, parent_name, node_to_ir(tag_name), node_to_ir(tag_attr)]
         return create unless SELF_CLOSING_TAGS.include?(tag_type)
 
         current_frame.elems << create
-        IR::Content[collect_frame(@frames.pop)]
+        IR::Container[@frames.pop]
 
       in [:tag, _start_solidus, _tag_name, _tag_attr, _end_solidus] # Closing tag
-        IR::Content[collect_frame(@frames.pop)]
+        IR::Container[@frames.pop]
 
       in [:attribute, attr_name, _eql_token, attr_value] # Attribute
-        name = export(compile_node(attr_name))
-        if name[0...2] == "on" # Event
-          value = export(compile_node(attr_value), interpolate: false)
-          IR::Content[%(#{current_frame.name}.addEventListener("#{name[2...]}", #{value})\n)]
-        elsif attr_value.nil? # Boolean attribute
-          IR::Content[%(#{current_frame.name}.setAttribute("#{name}", true)\n)]
-        else
-          value = export(compile_node(attr_value), interpolate: true)
-          IR::Content[%(#{current_frame.name}.setAttribute("#{name}", "#{value}")\n)]
-        end
+        IR::Attribute[current_frame.name, node_to_ir(attr_name), node_to_ir(attr_value)]
 
       in [:attribute_value, _start_quote, value, _end_quote]
-        compile_node(value)
-
-      in [:code, code]
-        IR::Content["#{code.strip}\n"]
+        node_to_ir(value)
 
       in [:text, *children]
-        IR::Content[collect_text_children(children)]
+        IR::TextContainer[collect_children(children)]
 
       in [:document, *] | [:tag_attributes, *]
-        IR::Content[collect_children(node.children, interpolate: false)]
+        IR::Container[collect_children(node.children)]
 
       in [:attribute_name, *] | [:tag_name, *]
-        IR::Content[collect_children(node.children, interpolate: true)]
+        IR::InterpolateContainer[collect_children(node.children)]
       end
     end
 
@@ -149,23 +136,13 @@ module RERB
       @frames << Frame[current_frame.name]
 
       children.compact.each do |n|
-        # compile_node must be evaluated BEFORE current_frame because current_frame
-        # must be reflective of the current frame after whatever mutations compile_node did
-        compiled = compile_node(n)
+        # node_to_ir must be evaluated BEFORE current_frame because current_frame
+        # must be reflective of the current frame after whatever mutations node_to_ir did
+        compiled = node_to_ir(n)
         current_frame.elems << compiled
       end
 
-      collect_frame(@frames.pop, interpolate:)
-    end
-
-    def collect_text_children(children)
-      children.compact.map do |c|
-        @exporter.child_ir_to_s(compile_node(c), current_frame.name)
-      end.join
-    end
-
-    def export(target, interpolate: false)
-      @exporter.ir_to_s(target, current_frame.name, interpolate:)
+      @frames.pop
     end
 
     def current_frame
