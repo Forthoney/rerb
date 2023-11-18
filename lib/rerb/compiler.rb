@@ -6,6 +6,7 @@ require "better_html/tree/tag"
 
 require "rerb"
 require "rerb/ir"
+require "rerb/ir_exporter"
 
 module RERB
   # Compile ERB into ruby.wasm compatible code
@@ -41,7 +42,7 @@ module RERB
       @name_hash = Hash.new { |h, k| h[k] = 0 }
       @root_elem_name = root_elem_name
       @frames = [Frame[root_elem_name]]
-      @exporter = IR::RawDOMOperationExporter.new
+      @exporter = IRExporter::DOMOperationExporter.new
     end
 
     def compile
