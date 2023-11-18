@@ -41,6 +41,7 @@ module RERB
       @name_hash = Hash.new { |h, k| h[k] = 0 }
       @root_elem_name = root_elem_name
       @frames = [Frame[root_elem_name]]
+      @exporter = IR::RawDOMOperationExporter.new
     end
 
     def compile
@@ -70,19 +71,14 @@ module RERB
     end
 
     def compile_body
-      dom_to_str(compile_ast(@parser.ast)).strip
+      export(compile_node(@parser.ast)).strip
     end
 
     private
 
-    def create_parser(source)
-      buffer = Parser::Source::Buffer.new("(buffer)", source:)
-      BetterHtml::Parser.new(buffer)
-    end
-
-    # Unfortunately, this very ugly pattern matching is the only way to
-    # pattern match the AST::Nodes from better-html
-    def compile_ast(node)
+    def compile_node(node)
+      # Unfortunately, this very ugly pattern matching is the only way to
+      # pattern match the AST::Nodes from better-html
       case node
       in nil | [:quote, *]
         IR::Ignore[]
@@ -90,17 +86,17 @@ module RERB
       in String
         node.strip.empty? ? IR::Ignore[] : IR::Content[node.strip]
 
-      in [:erb, nil, start_trim, code, end_trim] # ERB statement
-        IR::RubyStatement[dom_to_str(compile_ast(code)).strip.to_s]
+      in [:erb, nil, _start_trim, code, _end_trim] # ERB statement
+        IR::RubyStatement[export(compile_node(code)).strip.to_s]
 
-      in [:erb, _ind, start_trim, code, end_trim] # ERB expression
-        IR::RubyExpr[dom_to_str(compile_ast(code)).strip.to_s]
+      in [:erb, _ind, _start_trim, code, _end_trim] # ERB expression
+        IR::RubyExpr[export(compile_node(code)).strip.to_s]
 
       in [:tag, nil, tag_name, tag_attr, _end_solidus] # Opening tag
-        tag_type = dom_to_str(compile_ast(tag_name))
+        tag_type = export(compile_node(tag_name))
         el_name = generate_el_name(tag_type)
         @frames << Frame[el_name]
-        attrs = dom_to_str(compile_ast(tag_attr))
+        attrs = export(compile_node(tag_attr))
 
         create = IR::Create[el_name, "#{el_name} = document.createElement('#{tag_type}')\n#{attrs}"]
         return create unless SELF_CLOSING_TAGS.include?(tag_type)
@@ -112,25 +108,25 @@ module RERB
         IR::Content[collect_frame(@frames.pop)]
 
       in [:attribute, attr_name, _eql_token, attr_value] # Attribute
-        name = dom_to_str(compile_ast(attr_name))
+        name = export(compile_node(attr_name))
         if name[0...2] == "on" # Event
-          value = dom_to_str(compile_ast(attr_value), interpolate: false)
+          value = export(compile_node(attr_value), interpolate: false)
           IR::Content[%(#{current_frame.name}.addEventListener("#{name[2...]}", #{value})\n)]
         elsif attr_value.nil? # Boolean attribute
           IR::Content[%(#{current_frame.name}.setAttribute("#{name}", true)\n)]
         else
-          value = dom_to_str(compile_ast(attr_value), interpolate: true)
+          value = export(compile_node(attr_value), interpolate: true)
           IR::Content[%(#{current_frame.name}.setAttribute("#{name}", "#{value}")\n)]
         end
 
       in [:attribute_value, _start_quote, value, _end_quote]
-        compile_ast(value)
+        compile_node(value)
 
       in [:code, code]
         IR::Content["#{code.strip}\n"]
 
       in [:text, *children]
-        IR::Content[join_text_children(children)]
+        IR::Content[collect_text_children(children)]
 
       in [:document, *] | [:tag_attributes, *]
         IR::Content[collect_children(node.children, interpolate: false)]
@@ -140,52 +136,36 @@ module RERB
       end
     end
 
-    def join_text_children(children)
-      f_name = current_frame.name
-      children.compact.map do |c|
-        case compile_ast(c)
-        in IR::RubyStatement(content)
-          "#{content}\n"
-        in IR::Ignore
-          ""
-        in IR::Content(content)
-          %(#{f_name}.appendChild(document.createTextNode("#{content}"))\n)
-        in IR::RubyExpr(content)
-          %(#{f_name}.appendChild(document.createTextNode("\#{#{content}}"))\n)
-        end
-      end.join
-    end
-
-    def dom_to_str(elem, interpolate: false)
-      case elem
-      in IR::Create(el_name, content)
-        content.to_s + "#{current_frame.name}.appendChild(#{el_name})\n"
-      in IR::Content(content)
-        content.to_s
-      in IR::RubyStatement(content)
-        content.to_s
-      in IR::RubyExpr(content)
-        interpolate ? "\#{#{content}}" : content.to_s
-      in IR::Ignore
-        ""
-      end
+    def create_parser(source)
+      buffer = Parser::Source::Buffer.new("(buffer)", source:)
+      BetterHtml::Parser.new(buffer)
     end
 
     def collect_frame(frame, interpolate: false)
-      frame.elems.map { |e| dom_to_str(e, interpolate:) }.join
+      frame.elems.map { |e| export(e, interpolate:) }.join
     end
 
     def collect_children(children, interpolate: false)
       @frames << Frame[current_frame.name]
 
       children.compact.each do |n|
-        # compile_ast must be evaluated BEFORE current_frame because current_frame
-        # must be reflective of the current frame after whatever mutations compile_ast did
-        compiled = compile_ast(n)
+        # compile_node must be evaluated BEFORE current_frame because current_frame
+        # must be reflective of the current frame after whatever mutations compile_node did
+        compiled = compile_node(n)
         current_frame.elems << compiled
       end
 
       collect_frame(@frames.pop, interpolate:)
+    end
+
+    def collect_text_children(children)
+      children.compact.map do |c|
+        @exporter.child_ir_to_s(compile_node(c), current_frame.name)
+      end.join
+    end
+
+    def export(target, interpolate: false)
+      @exporter.ir_to_s(target, current_frame.name, interpolate:)
     end
 
     def current_frame
