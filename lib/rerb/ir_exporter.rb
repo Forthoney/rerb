@@ -7,15 +7,15 @@ module RERB
     class InspectExporter
       def initialize; end
 
-      def ir_to_s(elem)
-        elem.deconstruct.map(&:to_s).join
+      def ir_to_s(ir)
+        ir.deconstruct.map(&:to_s).join
       end
     end
 
     # Export into valid ruby.wasm js interop DOM operations
     class DOMOperationExporter < InspectExporter
-      def ir_to_s(elem, interpolate: false)
-        case elem
+      def ir_to_s(ir, interpolate: false)
+        case ir
         in IR::Create(el_name:, parent_name:, tag_type:, attributes:)
           "#{el_name} = document.createElement('#{ir_to_s(tag_type)}')\n" +
             ir_to_s(attributes) + "#{parent_name}.appendChild(#{el_name})\n"

@@ -1,0 +1,24 @@
+module RERB
+  # Collection of export targets for IR
+  module IRExporter
+    # Export using Data#inspect
+    class InspectExporter
+      def initialize: () -> void
+
+      def ir_to_s: (IR::u_Node ir) -> String
+    end
+
+    # Export into valid ruby.wasm js interop DOM operations
+    class DOMOperationExporter < InspectExporter
+      def ir_to_s: (IR::u_Node ir, ?interpolate: bool) -> String
+
+      private
+
+      def text_ir_to_s: (IR::u_Node ir, String frame_name) -> untyped
+
+      def attr_ir_to_s: (String target,
+                         IR::u_Node name,
+                         IR::u_Node value) -> untyped
+    end
+  end
+end

@@ -1,12 +1,69 @@
 module RERB
-  # Intermediate Representation Nodes
+  # Intermediate Representation u_Nodes
   module IR
-    class Content < Data end
-    class RubyExpr < Data end
-    class RubyStatement < Data end
-    class Create < Data end
-    class Ignore < Data end
+    class Container
+      attr_reader frame: RERB::Compiler::Frame
 
-    type node = Content | RubyExpr | RubyStatement | Create | Ignore
+      def initialize: (RERB::Compiler::Frame frame) -> void
+    end
+
+    class InterpolateContainer
+      attr_reader frame: RERB::Compiler::Frame
+
+      def initialize: (RERB::Compiler::Frame frame) -> void
+    end
+
+    class TextContainer
+      attr_reader frame: RERB::Compiler::Frame
+
+      def initialize: (RERB::Compiler::Frame frame) -> void
+    end
+
+    class Attribute
+      attr_reader target: String
+      attr_reader name: u_Node
+      attr_reader value: u_Node
+
+      def initialize: (String target, u_Node name, u_Node value) -> void
+    end
+
+    class RubyExpr
+      attr_reader code: u_Node
+
+      def initialize: (u_Node code) -> void
+    end
+
+    class RubyStatement
+      attr_reader code: u_Node
+
+      def initialize: (u_Node code) -> void
+    end
+
+    class Create
+      attr_reader el_name: String
+      attr_reader parent_name: String
+      attr_reader tag_type: u_Node
+      attr_reader attributes: u_Node
+
+      def initialize: (String el_name,
+                       String parent_name,
+                       u_Node tag_type,
+                       u_Node attributes) -> void
+    end
+
+    class Text
+      attr_reader content: String
+
+      def initialize: (String content) -> void
+    end
+
+    class Ignore
+      def initialize: () -> void
+    end
+
+    # u_ indicates union
+    type u_Node = Container | InterpolateContainer | TextContainer |
+                  Attribute | RubyExpr | RubyStatement |
+                  Create | Text | Ignore
   end
 end

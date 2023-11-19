@@ -16,11 +16,11 @@ end
 module RERB
   # Compile ERB into ruby.wasm compatible code
   class Compiler
-    class Frame < Data
+    class Frame
       attr_reader name: String
-      attr_reader elems: Array[IR::node]
+      attr_reader elems: Array[IR::u_Node]
 
-      def initialize: (String, ?Array[IR::node]) -> void
+      def initialize: (String, ?Array[IR::u_Node]) -> void
     end
 
     @counter: Integer
@@ -35,6 +35,14 @@ module RERB
 
     @frames: Array[Frame]
 
+    @exporter: IRExporter::InspectExporter
+
+    SELF_CLOSING_TAGS: Array["area" | "base" | "br" |
+                             "col" | "embed" | "hr" |
+                             "img" | "input" | "link" |
+                             "meta" | "param" | "source" |
+                             "track" | "wbr"]
+
     def initialize: (String source,
                      String viewmodel_name,
                      ?String root_elem_name) -> void
@@ -45,20 +53,15 @@ module RERB
 
     private
 
+    def node_to_ir: (BetterHtml::AST::Node node) -> IR::u_Node
+
     def create_parser: (String source) -> BetterHtml::Parser
 
-    def compile_ast: (BetterHtml::AST::Node | String node) -> IR::node
-
-    def join_text_children: (Array[IR::node | nil] children) -> String
-
-    def dom_to_str: (IR::node elem, ?interpolate: bool) -> String
-
-    def collect_frame: (Frame frame, ?interpolate: bool) -> untyped
-
-    def collect_children: (Array[BetterHtml::AST::Node] children, ?interpolate: bool) -> untyped
+    def collect_children: (Array[BetterHtml::AST::Node] children,
+                           ?interpolate: bool) -> Frame
 
     def current_frame: () -> Frame
 
-    def generate_el_name: (String) -> String
+    def generate_el_name: (String tag_type) -> String
   end
 end
